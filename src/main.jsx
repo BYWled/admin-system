@@ -6,7 +6,6 @@ import App from './App.jsx'
 
 createRoot(document.getElementById('root')).render(
   // <StrictMode>
-  // 设置默认路由前缀为项目名
   <BrowserRouter>
     <App />
   </BrowserRouter>
