@@ -1,0 +1,48 @@
+name: 自动部署到 GitHub Pages
+# 本项目较为特殊，使用 Route History 模式，需要额外处理 404 问题
+
+on:
+  push:
+    branches:
+      - dev # 监听 dev 分支的推送
+
+# 必须添加这个权限设置，允许 Action 修改仓库内容（推送到 gh-pages）
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检查出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: 设置 Node 环境
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 构建项目
+        run: pnpm run build
+
+      # 【关键】解决 History 路由 404 问题：直接在构建产物中复制 index.html
+      - name: 复制 404 页面以支持 History 模式
+        run: cp dist/index.html dist/404.html
+
+      - name: 部署到 gh-pages 分支 🚀
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: gh-pages # 部署生成的分支
+          commit_message: ${{ github.event.head_commit.message }}
+          cname: admin.wled.top # 自定义域名
