@@ -1,0 +1,17 @@
+.leftMenu {
+    background-color: #fefefe;
+    color: #111;
+    height: 100vh;
+    box-shadow: 0 0 2px rgba(192, 192, 192, 0.3);
+}
+
+.menuLogo {
+    height: 5%;
+    margin-top: 3%;
+
+    .menuTitle {
+        margin: 0 8px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+}

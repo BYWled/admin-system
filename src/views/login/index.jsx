@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import s from '../../styles/login.module.scss'
-import { Button, Form, Input, Typography, ConfigProvider } from 'antd';
+import { Button, Form, Input, Typography, ConfigProvider, Divider, Flex, Avatar } from 'antd';
 
 const { Title } = Typography;
 
@@ -21,7 +21,10 @@ export default function Login() {
                         components: {
                             Form: {
                                 labelFontSize: '16px',
-                            },
+                            }
+                        },
+                        token: {
+                            colorSplit: '#999',
                         },
                     }}
                 >
@@ -45,8 +48,13 @@ export default function Login() {
                             <Button htmlType="submit" ghost className={s.loginBtn} type="primary" size='large'>登录</Button>
                         </Form.Item>
                     </Form>
+                    <Divider style={{ margin: '20px 0' }}>more</Divider>
                 </ConfigProvider>
-
+                <Flex gap={20} justify="center">
+                    <Avatar className='a' size={40} onClick={() => window.location.href = 'https://github.com/BYWled/admin-system'} src={<img draggable={false} src={"https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png"} alt="Github" />} />
+                    <Avatar className='a' size={40} onClick={() => window.location.href = 'https://gitee.com/BYWled/admin-system'} src={<img draggable={false} src={"https://gitee.com/static/images/gitee-logos/logo_gitee_g_red.svg"} alt="Gitee" />} />
+                    <Avatar className='a' size={40} onClick={() => window.location.href = 'https://www.wled.top'}>BLOG</Avatar>
+                </Flex>
             </div>
         </div >
     )

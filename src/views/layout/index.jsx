@@ -1,20 +1,25 @@
 import React from 'react'
+import s from '../../styles/layout.module.scss'
+import LeftMenu from './leftMenu'
 import { Outlet } from 'react-router-dom'
+import { Layout } from 'antd';
 
 export default function layout() {
+  const { Header, Footer, Sider, Content } = Layout;
   return (
-    <div>
-        <div className="left-menu">
-          菜单
-        </div>
-        <div className="content">
-            <div className="header">右边的顶部</div>
-            <div className="container">
-               <Outlet />
-            </div>
-        </div>
-
-
-    </div>
+    <>
+      <Layout>
+        <Sider className={s.leftMenu}>
+          <LeftMenu />
+        </Sider>
+        <Layout>
+          <Header>Header</Header>
+          <Content>
+            <Outlet />
+          </Content>
+          <Footer>Footer</Footer>
+        </Layout>
+      </Layout>
+    </>
   )
 }
