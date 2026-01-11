@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import s from '../../styles/layout.module.scss'
 import { useNavigate, useLocation, useMatches } from 'react-router-dom';
 import { AppstoreOutlined, MailOutlined, SettingOutlined } from '@ant-design/icons';
@@ -74,14 +74,14 @@ export default function LeftMenu() {
   const navigate = useNavigate();
   const location = useLocation();
   const matches = useMatches();
-  const [stateOpenKeys, setStateOpenKeys] = useState([matches[0].pathname + 's']);
+  const [stateOpenKeys, setStateOpenKeys] = useState([matches[0].pathname + 's']); // 默认展开当前路径对应的一级菜单，即使是一级菜单导致展开无效也没关系，相当于不展开任何菜单
   const [selectedKeys, setSelectedKeys] = useState([location.pathname]);
   const [selectedOpenKeys, setSelectedOpenKeys] = useState([matches[0].pathname + 's']);
 
   const currentOpenId = () => {
     // 找到当前已选中路径对应的菜单id
-    const current = items.find(item => item.key === matches[0].pathname + 's');
-    return current ? current.id : null;
+    const current = items.find(item => item.key === matches[0].pathname + 's');  // 由于找的是组装的一级菜单key，所以可能会找不到的情况
+    return current ? current.id : null; // 找不到就说明当前页就是一级菜单
   };
 
   // 菜单切换时自动展开关闭
@@ -90,18 +90,40 @@ export default function LeftMenu() {
     const openIds = items.filter(item => openKeys.includes(item.key)).map(i => i.id);
     // 找最新展开的id
     const latestOpenId = openIds.find(id => !stateOpenKeys.includes(items.find(item => item.id === id).key)); // 先找有的，没有的那个就是最新展开的
-    // 如果小于2，则直接设置
-    if (openIds.length > 2) {
-      // 大于2则说明有多级菜单展开，只保留当前展开的和最后一个展开的
-      const newOpenIds = [currentOpenId(), latestOpenId]; // 保留当前展开的和最新展开的
+    const nowId = currentOpenId();
+    // 展开数量阈值
+    let num = 2;
+    // 是否展开当前选中菜单
+    let isNowOpen = false;
+    // 当前展开的id不存在，即打开的是一级菜单
+    // 一级菜单直接设置的阈值设为1
+    if (!nowId) num = 1;
+    // 当前展开的id存在但不在展开列表中，即关闭的是当前展开的菜单
+    else if (!openIds.includes(nowId)) { num = 1; isNowOpen = false; }
+    // 否则说明是多级菜单展开
+    else { num = 2; isNowOpen = true; };
+    // 小于长度时直接设置
+    if (openIds.length <= num) setStateOpenKeys(openKeys);
+    else {
+      // 否则只保留当前展开的和最新展开的
+      const newOpenIds = nowId && isNowOpen ? [nowId, latestOpenId] : [latestOpenId]; // 保留当前展开的和最新展开的（当前为1级页面则不放入）
       // 设置新的展开keys
       const newOpenKeys = newOpenIds.map(id => items.find(item => item.id === id).key); // 根据id找key
       setStateOpenKeys(newOpenKeys);
-    } else if (!openIds.includes(currentOpenId())) { // 如果不包含当前展开的，则只保留最新展开的TODO:当前选中无法关闭
-      setStateOpenKeys([items.find(item => item.id === latestOpenId).key]);
-    } else { // 否则直接设置
-      setStateOpenKeys(openKeys);
-    }
+    };
+    // 一级页面时失效
+    // // 如果小于2，则直接设置
+    // if (openIds.length >= 2) {
+    //   // 大于2则说明有多级菜单展开，只保留当前展开的和最后一个展开的
+    //   const newOpenIds = [nowId, latestOpenId]; // 保留当前展开的和最新展开的
+    //   // 设置新的展开keys
+    //   const newOpenKeys = newOpenIds.map(id => items.find(item => item.id === id).key); // 根据id找key
+    //   setStateOpenKeys(newOpenKeys);
+    // } else if (!openIds.includes(nowId)) { // 如果不包含当前展开的，则只保留最新展开的选中
+    //   setStateOpenKeys([items.find(item => item.id === latestOpenId).key]);
+    // } else { // 否则直接设置
+    //   setStateOpenKeys(openKeys);
+    // }
   };
 
   // 菜单点击跳转

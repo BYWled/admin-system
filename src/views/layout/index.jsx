@@ -1,4 +1,3 @@
-import React from 'react'
 import s from '../../styles/layout.module.scss'
 import LeftMenu from './leftMenu'
 import { Outlet } from 'react-router-dom'
