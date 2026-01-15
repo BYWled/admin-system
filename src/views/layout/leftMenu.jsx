@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, use } from 'react';
 import s from '../../styles/layout.module.scss'
 import { useNavigate, useLocation, useMatches } from 'react-router-dom';
 import { AppstoreOutlined, MailOutlined, SettingOutlined } from '@ant-design/icons';
@@ -69,14 +69,20 @@ const items = [
 ];
 
 // 主函数
-export default function LeftMenu() {
+export default function LeftMenu(props) {
   // 初始化hooks
   const navigate = useNavigate();
   const location = useLocation();
   const matches = useMatches();
+  const [titleText, setTitleText] = useState(true);
   const [stateOpenKeys, setStateOpenKeys] = useState([matches[0].pathname + 's']); // 默认展开当前路径对应的一级菜单，即使是一级菜单导致展开无效也没关系，相当于不展开任何菜单
   const [selectedKeys, setSelectedKeys] = useState([location.pathname]);
   const [selectedOpenKeys, setSelectedOpenKeys] = useState([matches[0].pathname + 's']);
+
+  // TODO: 不能直接在外面写延时生成，会导致重复执行。需使用副作用监听collapsed变化，控制标题显示隐藏
+  useEffect(() => {
+    props.collapsed ? setTitleText(false) : setTimeout(() => { setTitleText(true) }, 120);
+  }, [props.collapsed]);
 
   const currentOpenId = () => {
     // 找到当前已选中路径对应的菜单id
@@ -111,19 +117,6 @@ export default function LeftMenu() {
       const newOpenKeys = newOpenIds.map(id => items.find(item => item.id === id).key); // 根据id找key
       setStateOpenKeys(newOpenKeys);
     };
-    // 一级页面时失效
-    // // 如果小于2，则直接设置
-    // if (openIds.length >= 2) {
-    //   // 大于2则说明有多级菜单展开，只保留当前展开的和最后一个展开的
-    //   const newOpenIds = [nowId, latestOpenId]; // 保留当前展开的和最新展开的
-    //   // 设置新的展开keys
-    //   const newOpenKeys = newOpenIds.map(id => items.find(item => item.id === id).key); // 根据id找key
-    //   setStateOpenKeys(newOpenKeys);
-    // } else if (!openIds.includes(nowId)) { // 如果不包含当前展开的，则只保留最新展开的选中
-    //   setStateOpenKeys([items.find(item => item.id === latestOpenId).key]);
-    // } else { // 否则直接设置
-    //   setStateOpenKeys(openKeys);
-    // }
   };
 
   // 菜单点击跳转
@@ -137,7 +130,7 @@ export default function LeftMenu() {
     <>
       <Flex justify="center" align="center" className={s.menuLogo}>
         <Avatar src={<img draggable={false} src={"https://www.wled.top/images/Oz-Vessalius-avatar.svg"} />} />
-        <span className={s.menuTitle}>后台管理系统</span>
+        { titleText && <span className={s.menuTitle}>后台管理系统</span>}
       </Flex>
       <Menu
         mode="inline"

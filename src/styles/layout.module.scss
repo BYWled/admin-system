@@ -6,12 +6,27 @@
 }
 
 .menuLogo {
-    height: 5%;
-    margin-top: 3%;
+    padding: 0 5%;
 
     .menuTitle {
-        margin: 0 8px;
-        font-size: 18px;
+        padding: 0 8px;
+        font-size: 16px;
         font-weight: bold;
     }
+}
+
+.layoutHeader,
+.menuLogo {
+    height: 6%;
+    padding: 0 1%;
+    display: flex;
+    align-items: center;
+    background-color: #111;
+    color: #eee;
+}
+
+.layoutFooter {
+    height: 6%;
+    background-color: #111;
+    color: #eee;
 }
