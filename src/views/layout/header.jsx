@@ -32,7 +32,7 @@ export default function LayoutHeader(props) {
             label: '注销',
             icon: <LogoutOutlined />,
             danger: true,
-            onClick: () => navigate('/login'),
+            onClick: props.logout,
         },
     ]
 
