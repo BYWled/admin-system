@@ -1,101 +1,60 @@
 import { useState, useEffect, use } from 'react';
 import s from '../../styles/layout.module.scss'
 import { useNavigate, useLocation, useMatches } from 'react-router-dom';
-import { AppstoreOutlined, MailOutlined, SettingOutlined } from '@ant-design/icons';
 import { Flex, Menu, Avatar } from 'antd';
+import staticRouter from '../../router/index.jsx';
 
-// 菜单列表
-const items = [
-  {
-    id: 1,
-    key: '/home',
-    icon: <MailOutlined />,
-    label: '首页'
-  },
-  {
-    id: 2,
-    key: '/users',
-    icon: <AppstoreOutlined />,
-    label: '用户管理',
-    children: [
-      { id: 21, key: '/user', label: '用户列表' },
-      { id: 22, key: '/user/add', label: '添加用户' },
-      { id: 23, key: '/user/edit', label: '编辑用户' }
-    ],
-  },
-  {
-    id: 3,
-    key: '/goodss',
-    icon: <SettingOutlined />,
-    label: '商品管理',
-    children: [
-      { id: 31, key: '/goods', label: '商品列表' },
-      { id: 32, key: '/goods/add', label: '添加商品' },
-      { id: 33, key: '/goods/classify', label: '商品分类' }
-    ],
-  },
-  {
-    id: 4,
-    key: '/order',
-    icon: <MailOutlined />,
-    label: '订单管理'
-  },
-  {
-    id: 5,
-    key: '/store',
-    icon: <MailOutlined />,
-    label: '店铺管理'
-  },
-  {
-    id: 6,
-    key: '/statisticss',
-    icon: <MailOutlined />,
-    label: '统计管理',
-    children: [
-      { id: 61, key: '/statistics', label: '商品统计' },
-      { id: 62, key: '/statistics/order', label: '订单统计' },
-    ]
-  },
-  {
-    id: 7,
-    key: '/roles',
-    icon: <MailOutlined />,
-    label: '角色管理',
-    children: [
-      { id: 71, key: '/role', label: '角色列表' },
-      { id: 72, key: '/role/permission', label: '权限列表' },
-    ]
-  }
-];
-
-// 主函数
 export default function LeftMenu(props) {
-  // 初始化hooks
+  //******************初始化变量、Hooks******************
   const navigate = useNavigate();
   const location = useLocation();
   const matches = useMatches();
+  const [routers, setRouters] = useState([]);
   const [titleText, setTitleText] = useState(true);
   const [stateOpenKeys, setStateOpenKeys] = useState([matches[0].pathname + 's']); // 默认展开当前路径对应的一级菜单，即使是一级菜单导致展开无效也没关系，相当于不展开任何菜单
   const [selectedKeys, setSelectedKeys] = useState([location.pathname]);
   const [selectedOpenKeys, setSelectedOpenKeys] = useState([matches[0].pathname + 's']);
 
+  //******************副作用函数部分，用作生命周期与监听******************
+  // 载入菜单时，格式化路由数据
+  useEffect(() => {
+    // TODO: forEach无法返回新数组，需改用map+filter
+    // TODO: 不能对react函数组件进行JSON深拷贝，会导致<icon />变成空对象导致无法传递
+    const deRouters = staticRouter.routes
+    // 不传 element、path、hasErrorBoundary 等内部字段
+    const menuItems = deRouters.filter(item => item.key).map(item => {
+      // children 为空判断
+      let children = item.children.filter(c => c.key)
+      if (children.length === 0) return { id: item.id, key: item.key, label: item.label, icon: item.icon };
+      // 子节点也需要剔除
+      children = children.map(c => ({
+        id: c.id,
+        key: c.key,
+        label: c.label
+      }));
+      return { id: item.id, key: item.key, label: item.label, icon: item.icon, children };
+    });
+    setRouters(menuItems);
+  }, []);
+
+  // 标题显示隐藏控制
   // TODO: 不能直接在外面写延时生成，会导致重复执行。需使用副作用监听collapsed变化，控制标题显示隐藏
   useEffect(() => {
-    props.collapsed ? setTitleText(false) : setTimeout(() => { setTitleText(true) }, 120);
+    props.collapsed ? setTitleText(false) : setTimeout(() => { setTitleText(true) }, 180);
   }, [props.collapsed]);
 
   const currentOpenId = () => {
     // 找到当前已选中路径对应的菜单id
-    const current = items.find(item => item.key === matches[0].pathname + 's');  // 由于找的是组装的一级菜单key，所以可能会找不到的情况
+    const current = routers.find(item => item.key === matches[0].pathname + 's');  // 由于找的是组装的一级菜单key，所以可能会找不到的情况
     return current ? current.id : null; // 找不到就说明当前页就是一级菜单
   };
 
   // 菜单切换时自动展开关闭
   const onOpenChange = openKeys => {
     // 先遍历找到key对应的id
-    const openIds = items.filter(item => openKeys.includes(item.key)).map(i => i.id);
+    const openIds = routers.filter(item => openKeys.includes(item.key)).map(i => i.id);
     // 找最新展开的id
-    const latestOpenId = openIds.find(id => !stateOpenKeys.includes(items.find(item => item.id === id).key)); // 先找有的，没有的那个就是最新展开的
+    const latestOpenId = openIds.find(id => !stateOpenKeys.includes(routers.find(item => item.id === id).key)); // 先找有的，没有的那个就是最新展开的
     const nowId = currentOpenId();
     // 展开数量阈值
     let num = 2;
@@ -114,7 +73,7 @@ export default function LeftMenu(props) {
       // 否则只保留当前展开的和最新展开的
       const newOpenIds = nowId && isNowOpen ? [nowId, latestOpenId] : [latestOpenId]; // 保留当前展开的和最新展开的（当前为1级页面则不放入）
       // 设置新的展开keys
-      const newOpenKeys = newOpenIds.map(id => items.find(item => item.id === id).key); // 根据id找key
+      const newOpenKeys = newOpenIds.map(id => routers.find(item => item.id === id).key); // 根据id找key
       setStateOpenKeys(newOpenKeys);
     };
   };
@@ -130,7 +89,7 @@ export default function LeftMenu(props) {
     <>
       <Flex justify="center" align="center" className={s.menuLogo}>
         <Avatar src={<img draggable={false} src={"https://www.wled.top/images/Oz-Vessalius-avatar.svg"} />} />
-        { titleText && <span className={s.menuTitle}>后台管理系统</span>}
+        {titleText && <span className={s.menuTitle}>后台管理系统</span>}
       </Flex>
       <Menu
         mode="inline"
@@ -140,7 +99,7 @@ export default function LeftMenu(props) {
         openKeys={stateOpenKeys}
         onClick={changeRouter}
         style={{ width: '100%' }}
-        items={items}
+        items={routers}
       />
     </>
   );

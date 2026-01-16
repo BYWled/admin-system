@@ -15,8 +15,9 @@ import GoodsStatistics from '../views/statistics/goods.jsx'
 import OrderStatistics from '../views/statistics/order.jsx'
 import Permission from '../views/role/permission.jsx'
 import Role from '../views/role/role.jsx'
+import { AppstoreOutlined, MailOutlined, SettingOutlined } from '@ant-design/icons';
 
-const staticRouter = createHashRouter([
+export const staticRouter = [
     // 默认路由
     {
         path: '/',
@@ -28,7 +29,11 @@ const staticRouter = createHashRouter([
     },
     // 首页
     {
+        id: 1,
+        key: '/home',
         path: '/home',
+        label: '首页',
+        icon: <MailOutlined />,
         element: <Layout />,
         children: [
             {
@@ -39,98 +44,158 @@ const staticRouter = createHashRouter([
     },
     // 用户
     {
+        id: 2,
+        key: '/users',
         path: '/user',
+        label: '用户管理',
+        icon: <AppstoreOutlined />,
         element: <Layout />,
         children: [
             {
                 index: true,
-                element: <UserList />
+                element: <UserList />,
+                id: 21,
+                key: '/user',
+                label: '用户列表'
             },
             {
                 path: '/user/add',
-                element: <UserAdd />
+                element: <UserAdd />,
+                id: 22,
+                key: '/user/add',
+                label: '添加用户'
             },
             {
                 path: '/user/edit',
-                element: <UserEdit />
+                element: <UserEdit />,
+                id: 23,
+                key: '/user/edit',
+                label: '编辑用户'
             },
             {
                 path: '/user/info',
-                element: <UserInfo />
+                element: <UserInfo />,
+                id: 24,
+                key: '/user/info',
+                label: '用户信息'
             }
         ]
     },
     // 商品
     {
+        id: 3,
+        key: '/goodss',
         path: '/goods',
+        label: '商品管理',
+        icon: <SettingOutlined />,
         element: <Layout />,
         children: [
             {
                 index: true,
-                element: <GoodsList />
+                element: <GoodsList />,
+                id: 31,
+                key: '/goods',
+                label: '商品列表'
             },
             {
                 path: '/goods/add',
-                element: <GoodsAdd />
+                element: <GoodsAdd />,
+                id: 32,
+                key: '/goods/add',
+                label: '添加商品'
             },
             {
                 path: '/goods/classify',
-                element: <GoodsClassify />
+                element: <GoodsClassify />,
+                id: 33,
+                key: '/goods/classify',
+                label: '商品分类'
             }
         ]
     },
     // 订单
     {
+        id: 4,
+        key: '/order',
         path: '/order',
+        label: '订单管理',
+        icon: <MailOutlined />,
         element: <Layout />,
         children: [
             {
                 index: true,
-                element: <Order />
+                element: <Order />,
             }
         ]
     },
     // 门店
     {
+        id: 5,
+        key: '/store',
         path: '/store',
+        label: '店铺管理',
+        icon: <MailOutlined />,
         element: <Layout />,
         children: [
             {
                 index: true,
-                element: <Store />
+                element: <Store />,
+                label: '店铺管理'
             }
         ]
     },
     // 统计
     {
+        id: 6,
+        key: '/statisticss',
         path: '/statistics',
+        label: '统计管理',
+        icon: <MailOutlined />,
         element: <Layout />,
         children: [
             {
                 index: true,
-                element: <GoodsStatistics />
+                element: <GoodsStatistics />,
+                id: 61,
+                key: '/statistics',
+                label: '商品统计'
             },
             {
                 path: '/statistics/order',
-                element: <OrderStatistics />
+                element: <OrderStatistics />,
+                id: 62,
+                key: '/statistics/order',
+                label: '订单统计'
             }
         ]
     },
     // 角色
     {
+        id: 7,
+        key: '/roles',
         path: '/role',
+        label: '角色管理',
+        icon: <MailOutlined />,
         element: <Layout />,
         children: [
             {
                 index: true,
-                element: <Role />
+                element: <Role />,
+                id: 71,
+                key: '/role',
+                label: '角色列表'
             },
             {
                 path: '/role/permission',
-                element: <Permission />
+                element: <Permission />,
+                id: 72,
+                key: '/role/permission',
+                label: '权限列表'
             }
         ]
     }
-])
+]
 
-export default staticRouter;
+const router = createHashRouter(staticRouter)
+
+export default router;

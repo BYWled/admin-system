@@ -1,39 +1,33 @@
 import { useNavigate } from 'react-router-dom'
 import { loginApi } from '../../api/loginApi';
 import s from '../../styles/login.module.scss'
-import { Button, Form, Input, Typography, ConfigProvider, Divider, Flex, Avatar, message } from 'antd';
+import { App, Button, Form, Input, Typography, ConfigProvider, Divider, Flex, Avatar } from 'antd';
 
 const { Title } = Typography;
 
 export default function Login() {
     const navigate = useNavigate();
     const [form] = Form.useForm();
-    const [messageApi, contextHolder] = message.useMessage();
+    const { message, notification } = App.useApp();
 
     // 提交表单
     const onFinish = async values => {
         const res = await loginApi(values);
         if (res.code !== 0) {
-            messageApi.open({
-                type: 'error',
-                content: res.msg || '登录失败，请稍后重试',
-            });
+            message.error({ content: res.msg || '登录失败，请稍后重试', });
             return;
         }
         // 存储信息
         localStorage.setItem('admin', JSON.stringify({ id: res.id, role: res.role, token: res.token }));
-        messageApi.open({
-            type: 'success',
-            content: `${res.role}，欢迎回来！`,
+        notification.success({
+            title: '登录成功',
+            description: `${res.role}，欢迎回来！`,
         });
-        setTimeout(() => {
-            navigate('/home');
-        }, 1000);
+        navigate('/home');
     };
 
     return (
         <div className={s.login}>
-            {contextHolder}
             <div className={s.loginBox}>
                 <Title className={s.loginTitle} level={2}>欢迎使用后台管理系统</Title>
                 <ConfigProvider

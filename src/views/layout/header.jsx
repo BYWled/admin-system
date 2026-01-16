@@ -1,11 +1,13 @@
 import { MenuUnfoldOutlined, MenuFoldOutlined, LogoutOutlined } from '@ant-design/icons'
-import { Button, Flex, Avatar, Dropdown } from 'antd'
-import { useState } from 'react'
+import { Button, Flex, Avatar, Dropdown, Breadcrumb } from 'antd'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import staticRouter from '../../router/index.jsx'
 import s from '../../styles/layout.module.scss'
 
 export default function LayoutHeader(props) {
     const [collapsed, setCollapsed] = useState(props.collapsed || false);
+    const [nowUrl, setNowUrl] = useState([]);
     const navigate = useNavigate();
     const { id, role } = localStorage.getItem('admin') ? JSON.parse(localStorage.getItem('admin')) : {};
     const headerDropdown = [
@@ -41,6 +43,7 @@ export default function LayoutHeader(props) {
             <Button type="primary" onClick={toggleCollapsed} className="menuBtn" >
                 {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
             </Button>
+            {/* <Breadcrumb items={nowUrl} /> */}
             <Dropdown classNames={{ itemTitle: '用户信息' }} menu={{ items: headerDropdown }} placement="bottomRight" arrow={true}>
                 <Avatar className={'a'} src={<img draggable={false} src={"https://www.wled.top/images/Oz-Vessalius-avatar.svg"} />} />
             </Dropdown>
