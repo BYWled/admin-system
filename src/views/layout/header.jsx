@@ -1,5 +1,5 @@
 import { MenuUnfoldOutlined, MenuFoldOutlined, LogoutOutlined, LockOutlined, SkinOutlined } from '@ant-design/icons'
-import { Button, Flex, Avatar, Dropdown, Breadcrumb, ConfigProvider } from 'antd'
+import { Button, Flex, Avatar, Dropdown, Breadcrumb, ConfigProvider, Modal, Input } from 'antd'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import staticRouter from '../../router/index.jsx'
@@ -8,6 +8,8 @@ import s from '../../styles/layout.module.scss'
 export default function LayoutHeader(props) {
     // ******************初始化变量、Hooks******************
     const [collapsed, setCollapsed] = useState(props.collapsed || false);
+    const [lockDialogVisible, setLockDialogVisible] = useState(false);
+    const [lockPassword, setLockPassword] = useState('');
     const [nowUrl, setNowUrl] = useState([]);
     const navigate = useNavigate();
     const { id, role } = localStorage.getItem('admin') ? JSON.parse(localStorage.getItem('admin')) : {};
@@ -66,10 +68,17 @@ export default function LayoutHeader(props) {
         setNowUrl(urlArr);
     }, [window.location.hash]);
 
+    // ******************函数部分******************
     // 菜单折叠状态变化
     const toggleCollapsed = () => {
         setCollapsed(!collapsed);
         if (props.tCollapsed) props.tCollapsed(!collapsed);
+    }
+
+    // 确认锁屏
+    const confirmLock = () => {
+        if (props.tLockScreen) props.tLockScreen(lockPassword);
+        setLockDialogVisible(false);
     }
 
     return (
@@ -93,7 +102,18 @@ export default function LayoutHeader(props) {
                 <Breadcrumb items={nowUrl} separator=">" className={s.headerBreadCrumb} />
             </ConfigProvider>
             <Flex className={s.headerIcons} align="center">
-                <LockOutlined className={'a'} style={{ color: '#77bbff', fontSize: '16px' }} />
+                <LockOutlined onClick={() => setLockDialogVisible(true)} className={'a'} style={{ color: '#77bbff', fontSize: '16px' }} />
+                <Modal
+                    open={lockDialogVisible}
+                    title="锁屏"
+                    onOk={confirmLock}
+                    okText="确认并锁屏"
+                    closable={false}
+                    onCancel={() => setLockDialogVisible(false)}
+                    cancelText="取消"
+                >
+                    <Input.Password value={lockPassword} onChange={e => setLockPassword(e.target.value)} placeholder="请输入锁屏密码" />
+                </Modal>
                 <SkinOutlined className={'a'} style={{ color: '#77bbFF', fontSize: '16px' }} />
             </Flex>
             <Dropdown classNames={{ itemTitle: '用户信息' }} menu={{ items: headerDropdown }} placement="bottomRight" arrow={true}>

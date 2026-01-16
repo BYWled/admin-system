@@ -16,7 +16,8 @@
 }
 
 .layoutHeader,
-.menuLogo {
+.menuLogo,
+.layoutFooter {
     height: 6%;
     padding: 0 1%;
     display: flex;
@@ -29,12 +30,33 @@
     }
 
     .headerIcons {
-        gap:2vh;
+        gap: 2vh;
     }
 }
 
 .layoutFooter {
-    height: 6%;
-    background-color: #111;
-    color: #eee;
+    height: 3%;
+
+    
+}
+
+.lockRoot {
+    width: 100vw;
+    height: 100vh;
+}
+
+.lockMask {
+    height: 100%;
+    background: url(https://www.wled.top/images/wallhaven-wqery6-light.webp) center no-repeat;
+    background-size: cover;
+}
+
+.lockSection {
+    position: relative;
+    top: 25vh;
+    width: 50vw;
+    height: 50vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
