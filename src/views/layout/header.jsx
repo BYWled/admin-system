@@ -1,11 +1,12 @@
-import { MenuUnfoldOutlined, MenuFoldOutlined, LogoutOutlined } from '@ant-design/icons'
-import { Button, Flex, Avatar, Dropdown, Breadcrumb } from 'antd'
+import { MenuUnfoldOutlined, MenuFoldOutlined, LogoutOutlined, LockOutlined, SkinOutlined } from '@ant-design/icons'
+import { Button, Flex, Avatar, Dropdown, Breadcrumb, ConfigProvider } from 'antd'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import staticRouter from '../../router/index.jsx'
 import s from '../../styles/layout.module.scss'
 
 export default function LayoutHeader(props) {
+    // ******************初始化变量、Hooks******************
     const [collapsed, setCollapsed] = useState(props.collapsed || false);
     const [nowUrl, setNowUrl] = useState([]);
     const navigate = useNavigate();
@@ -33,6 +34,39 @@ export default function LayoutHeader(props) {
         },
     ]
 
+    // ******************副作用函数部分，用作生命周期与监听******************
+    // 载入当前路径面包屑导航
+    useEffect(() => {
+        // 先获取当前路径
+        const path = window.location.hash.replace('#', '');
+        // 拆分路径
+        let urlArr = path.split('/').filter(i => i); // 过滤掉空字符串
+        // 根据路径长度，判断面包屑
+        const currentLv1Router = staticRouter.routes.find(r => r.path === '/' + urlArr[0]);
+        urlArr[0] = {
+            title: (
+                <>
+                    {currentLv1Router && currentLv1Router.icon}
+                    <span>{currentLv1Router ? currentLv1Router.label : '未知页面'}</span>
+                </>
+            ),
+            path: '/' + urlArr[0]
+        };
+        if (urlArr.length > 1) {
+            const currentLv2Router = currentLv1Router.children.find(c => c.path === urlArr[0].path + '/' + urlArr[1]);
+            urlArr[1] = {
+                title: (
+                    <>
+                        {currentLv2Router && currentLv2Router.icon}
+                        <span>{currentLv2Router ? currentLv2Router.label : '未知页面'}</span>
+                    </>
+                )
+            }
+        };
+        setNowUrl(urlArr);
+    }, [window.location.hash]);
+
+    // 菜单折叠状态变化
     const toggleCollapsed = () => {
         setCollapsed(!collapsed);
         if (props.tCollapsed) props.tCollapsed(!collapsed);
@@ -43,7 +77,25 @@ export default function LayoutHeader(props) {
             <Button type="primary" onClick={toggleCollapsed} className="menuBtn" >
                 {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
             </Button>
-            {/* <Breadcrumb items={nowUrl} /> */}
+            <ConfigProvider
+                theme={{
+                    components: {
+                        Breadcrumb: {
+                            itemColor: '#ccc',
+                            lastItemColor: '#fff',
+                            linkColor: '#ccc',
+                            linkHoverColor: '#fff',
+                            separatorColor: '#555',
+                        },
+                    },
+                }}
+            >
+                <Breadcrumb items={nowUrl} separator=">" className={s.headerBreadCrumb} />
+            </ConfigProvider>
+            <Flex className={s.headerIcons} align="center">
+                <LockOutlined className={'a'} style={{ color: '#77bbff', fontSize: '16px' }} />
+                <SkinOutlined className={'a'} style={{ color: '#77bbFF', fontSize: '16px' }} />
+            </Flex>
             <Dropdown classNames={{ itemTitle: '用户信息' }} menu={{ items: headerDropdown }} placement="bottomRight" arrow={true}>
                 <Avatar className={'a'} src={<img draggable={false} src={"https://www.wled.top/images/Oz-Vessalius-avatar.svg"} />} />
             </Dropdown>

@@ -15,7 +15,7 @@ import GoodsStatistics from '../views/statistics/goods.jsx'
 import OrderStatistics from '../views/statistics/order.jsx'
 import Permission from '../views/role/permission.jsx'
 import Role from '../views/role/role.jsx'
-import { AppstoreOutlined, MailOutlined, SettingOutlined } from '@ant-design/icons';
+import { HomeOutlined, AppstoreOutlined, ShopOutlined, ContainerOutlined, BarChartOutlined, TeamOutlined, LockOutlined } from '@ant-design/icons';
 
 export const staticRouter = [
     // 默认路由
@@ -33,7 +33,7 @@ export const staticRouter = [
         key: '/home',
         path: '/home',
         label: '首页',
-        icon: <MailOutlined />,
+        icon: <HomeOutlined />,
         element: <Layout />,
         children: [
             {
@@ -48,7 +48,7 @@ export const staticRouter = [
         key: '/users',
         path: '/user',
         label: '用户管理',
-        icon: <AppstoreOutlined />,
+        icon: <TeamOutlined />,
         element: <Layout />,
         children: [
             {
@@ -87,7 +87,7 @@ export const staticRouter = [
         key: '/goodss',
         path: '/goods',
         label: '商品管理',
-        icon: <SettingOutlined />,
+        icon: <AppstoreOutlined />,
         element: <Layout />,
         children: [
             {
@@ -119,7 +119,7 @@ export const staticRouter = [
         key: '/order',
         path: '/order',
         label: '订单管理',
-        icon: <MailOutlined />,
+        icon: <ContainerOutlined />,
         element: <Layout />,
         children: [
             {
@@ -134,7 +134,7 @@ export const staticRouter = [
         key: '/store',
         path: '/store',
         label: '店铺管理',
-        icon: <MailOutlined />,
+        icon: <ShopOutlined />,
         element: <Layout />,
         children: [
             {
@@ -150,7 +150,7 @@ export const staticRouter = [
         key: '/statisticss',
         path: '/statistics',
         label: '统计管理',
-        icon: <MailOutlined />,
+        icon: <BarChartOutlined />,
         element: <Layout />,
         children: [
             {
@@ -175,7 +175,7 @@ export const staticRouter = [
         key: '/roles',
         path: '/role',
         label: '角色管理',
-        icon: <MailOutlined />,
+        icon: <LockOutlined />,
         element: <Layout />,
         children: [
             {

@@ -2,12 +2,13 @@ import s from '../../styles/layout.module.scss'
 import LeftMenu from './leftMenu'
 import LayoutHeader from './header'
 import { Outlet } from 'react-router-dom'
-import { Layout } from 'antd';
+import { Layout, Tour } from 'antd';
 import { useState } from 'react';
 
 export default function layout() {
   const { Header, Footer, Sider, Content } = Layout;
   const [collapsed, setCollapsed] = useState(false);
+  const [lockScreen, setLockScreen] = useState(false);
 
   return (
     <>
@@ -25,6 +26,7 @@ export default function layout() {
           <Footer className={s.layoutFooter}>Footer</Footer>
         </Layout>
       </Layout>
+      <Tour open={lockScreen} />
     </>
   )
 }
