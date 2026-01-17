@@ -92,6 +92,7 @@ export default function LeftMenu(props) {
         {titleText && <span className={s.menuTitle}>后台管理系统</span>}
       </Flex>
       <Menu
+        theme={props.darkMode ? 'dark' : 'light'}
         mode="inline"
         defaultSelectedKeys={selectedKeys}
         defaultOpenKeys={selectedOpenKeys}

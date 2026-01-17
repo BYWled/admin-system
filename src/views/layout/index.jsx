@@ -14,6 +14,7 @@ export default function layout() {
   const [collapsed, setCollapsed] = useState(false);
   const [lockScreen, setLockScreen] = useState(false);
   const [lockPassword, setLockPassword] = useState('');
+  const [darkMode, setDarkMode] = useState(false);
   const [nowTime, setNowTime] = useState(new Date().toLocaleTimeString());
   const navigate = useNavigate();
   const { message } = App.useApp();
@@ -36,6 +37,19 @@ export default function layout() {
     return () => clearInterval(time);
   }, [lockScreen]);
 
+  // 切换暗黑模式
+  useEffect(() => {
+    // 抓root根元素，修改css变量
+    const root = document.documentElement;
+    if (darkMode) {
+      root.style.setProperty('--backColor', '#111');
+      root.style.setProperty('--textColor', '#eee');
+    } else {
+      root.style.setProperty('--backColor', '#fefefe');
+      root.style.setProperty('--textColor', '#111');
+    }
+  }, [darkMode]);
+
   // ******************函数部分******************
   // 锁屏函数
   const onLockScreen = (password) => {
@@ -55,6 +69,11 @@ export default function layout() {
     } else {
       message.error('密码错误，请重新输入！');
     }
+  }
+
+  // 暗黑模式切换函数
+  const tDarkMode = () => {
+    setDarkMode(!darkMode);
   }
 
   // 退出登录函数
@@ -95,11 +114,11 @@ export default function layout() {
     <>
       {!lockScreen && <Layout>
         <Sider className={s.leftMenu} collapsed={collapsed}>
-          <LeftMenu collapsed={collapsed} />
+          <LeftMenu collapsed={collapsed} darkMode={darkMode} />
         </Sider>
         <Layout>
           <Header className={s.layoutHeader}>
-            <LayoutHeader tCollapsed={setCollapsed} collapsed={collapsed} tLockScreen={(password) => onLockScreen(password)} lockScreen={lockScreen} logout={logout} />
+            <LayoutHeader tCollapsed={setCollapsed} collapsed={collapsed} tLockScreen={(password) => onLockScreen(password)} lockScreen={lockScreen} darkMode={darkMode} tDarkMode={tDarkMode} logout={logout} />
           </Header>
           <Content>
             <Outlet />

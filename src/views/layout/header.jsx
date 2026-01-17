@@ -1,7 +1,6 @@
-import { MenuUnfoldOutlined, MenuFoldOutlined, LogoutOutlined, LockOutlined, SkinOutlined } from '@ant-design/icons'
+import { MenuUnfoldOutlined, MenuFoldOutlined, LogoutOutlined, LockOutlined, MoonOutlined, SunOutlined } from '@ant-design/icons'
 import { Button, Flex, Avatar, Dropdown, Breadcrumb, ConfigProvider, Modal, Input } from 'antd'
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { staticRouter } from '../../router/index.jsx'
 import s from '../../styles/layout.module.scss'
 
@@ -11,7 +10,6 @@ export default function LayoutHeader(props) {
     const [lockDialogVisible, setLockDialogVisible] = useState(false);
     const [lockPassword, setLockPassword] = useState('');
     const [nowUrl, setNowUrl] = useState([]);
-    const navigate = useNavigate();
     const { id, role } = localStorage.getItem('admin') ? JSON.parse(localStorage.getItem('admin')) : {};
     const headerDropdown = [
         {
@@ -91,11 +89,11 @@ export default function LayoutHeader(props) {
                 theme={{
                     components: {
                         Breadcrumb: {
-                            itemColor: '#ccc',
+                            itemColor: '#999',
                             lastItemColor: '#fff',
-                            linkColor: '#ccc',
-                            linkHoverColor: '#fff',
-                            separatorColor: '#555',
+                            linkColor: '#999',
+                            linkHoverColor: '#666',
+                            separatorColor: '#333',
                         },
                     },
                 }}
@@ -115,7 +113,12 @@ export default function LayoutHeader(props) {
                 >
                     <Input.Password value={lockPassword} onChange={e => setLockPassword(e.target.value)} placeholder="请输入锁屏密码" />
                 </Modal>
-                <SkinOutlined className={'a'} style={{ color: '#77bbFF', fontSize: '16px' }} />
+                {
+                    props.darkMode ?
+                        <MoonOutlined onClick={props.tDarkMode} className={'a'} style={{ color: '#bb9955', fontSize: '16px' }} />
+                        :
+                        <SunOutlined onClick={props.tDarkMode} className={'a'} style={{ color: '#bb9955', fontSize: '16px' }} />
+                }
             </Flex>
             <Dropdown classNames={{ itemTitle: '用户信息' }} menu={{ items: headerDropdown }} placement="bottomRight" arrow={true}>
                 <Avatar className={'a'} src={<img draggable={false} src={"https://www.wled.top/images/Oz-Vessalius-avatar.svg"} />} />

@@ -3,7 +3,7 @@ import { loginApi } from '../../api/loginApi';
 import s from '../../styles/login.module.scss'
 import { App, Button, Form, Input, Typography, ConfigProvider, Divider, Flex, Avatar } from 'antd';
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 export default function Login() {
     const navigate = useNavigate();
@@ -29,7 +29,7 @@ export default function Login() {
     return (
         <div className={s.login}>
             <div className={s.loginBox}>
-                <Title className={s.loginTitle} level={2}>欢迎使用后台管理系统</Title>
+                <Title className={s.loginTitle} level={2}>后台管理系统</Title>
                 <ConfigProvider
                     theme={{
                         components: {
@@ -60,6 +60,7 @@ export default function Login() {
                         </Form.Item>
                         <Form.Item>
                             <Button htmlType="submit" ghost className={s.loginBtn} type="primary" size='large'>登录</Button>
+                            <Text italic={true} style={{fontSize: '10px',color: '#999'}}>请使用HTTP协议访问网页，HTTPS会发生报错</Text>
                         </Form.Item>
                     </Form>
                     <Divider style={{ margin: '20px 0' }}>more</Divider>
