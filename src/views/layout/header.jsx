@@ -2,7 +2,7 @@ import { MenuUnfoldOutlined, MenuFoldOutlined, LogoutOutlined, LockOutlined, Ski
 import { Button, Flex, Avatar, Dropdown, Breadcrumb, ConfigProvider, Modal, Input } from 'antd'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import staticRouter from '../../router/index.jsx'
+import { staticRouter } from '../../router/index.jsx'
 import s from '../../styles/layout.module.scss'
 
 export default function LayoutHeader(props) {
@@ -44,7 +44,7 @@ export default function LayoutHeader(props) {
         // 拆分路径
         let urlArr = path.split('/').filter(i => i); // 过滤掉空字符串
         // 根据路径长度，判断面包屑
-        const currentLv1Router = staticRouter.routes.find(r => r.path === '/' + urlArr[0]);
+        const currentLv1Router = staticRouter.find(r => r.path === '/' + urlArr[0]);
         urlArr[0] = {
             title: (
                 <>
@@ -55,14 +55,15 @@ export default function LayoutHeader(props) {
             path: '/' + urlArr[0]
         };
         if (urlArr.length > 1) {
-            const currentLv2Router = currentLv1Router.children.find(c => c.path === urlArr[0].path + '/' + urlArr[1]);
+            const currentLv2Router = currentLv1Router.children.find(c => c.path === urlArr[1]);
             urlArr[1] = {
                 title: (
                     <>
                         {currentLv2Router && currentLv2Router.icon}
                         <span>{currentLv2Router ? currentLv2Router.label : '未知页面'}</span>
                     </>
-                )
+                ),
+                path: '/' + urlArr[1]
             }
         };
         setNowUrl(urlArr);

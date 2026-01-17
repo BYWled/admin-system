@@ -1,8 +1,8 @@
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect } from 'react';
 import s from '../../styles/layout.module.scss'
 import { useNavigate, useLocation, useMatches } from 'react-router-dom';
 import { Flex, Menu, Avatar } from 'antd';
-import staticRouter from '../../router/index.jsx';
+import { staticRouter } from '../../router/index.jsx';
 
 export default function LeftMenu(props) {
   //******************初始化变量、Hooks******************
@@ -22,7 +22,7 @@ export default function LeftMenu(props) {
     // TODO: 不能对react函数组件进行JSON深拷贝，会导致<icon />变成空对象导致无法传递
     const deRouters = staticRouter.routes
     // 不传 element、path、hasErrorBoundary 等内部字段
-    const menuItems = deRouters.filter(item => item.key).map(item => {
+    const menuItems = staticRouter.filter(item => item.key).map(item => {
       // children 为空判断
       let children = item.children.filter(c => c.key)
       if (children.length === 0) return { id: item.id, key: item.key, label: item.label, icon: item.icon };
