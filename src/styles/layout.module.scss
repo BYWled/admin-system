@@ -19,10 +19,14 @@
     }
 }
 
+.layoutMain {
+    height: 100vh;
+}
+
 .layoutHeader,
 .menuLogo,
 .layoutFooter {
-    height: 6%;
+    height: 6vh;
     padding: 0 1%;
     display: flex;
     align-items: center;
@@ -36,6 +40,10 @@
     .headerIcons {
         gap: 2vh;
     }
+}
+
+.layoutContent {
+    flex: 1;
 }
 
 .layoutFooter {

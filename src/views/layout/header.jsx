@@ -1,10 +1,10 @@
-import { MenuUnfoldOutlined, MenuFoldOutlined, LogoutOutlined, LockOutlined, MoonOutlined, SunOutlined } from '@ant-design/icons'
+import { MenuUnfoldOutlined, MenuFoldOutlined, LogoutOutlined, LockOutlined, MoonOutlined, SunOutlined, BorderLeftOutlined } from '@ant-design/icons'
 import { Button, Flex, Avatar, Dropdown, Breadcrumb, ConfigProvider, Modal, Input } from 'antd'
 import { useState, useEffect } from 'react'
 import { staticRouter } from '../../router/index.jsx'
 import s from '../../styles/layout.module.scss'
 
-export default function LayoutHeader(props) {
+export default function LeftHeader(props) {
     // ******************初始化变量、Hooks******************
     const [collapsed, setCollapsed] = useState(props.collapsed || false);
     const [lockDialogVisible, setLockDialogVisible] = useState(false);
@@ -119,6 +119,7 @@ export default function LayoutHeader(props) {
                         :
                         <SunOutlined onClick={props.tDarkMode} className={'a'} style={{ color: '#bb9955', fontSize: '16px' }} />
                 }
+                <BorderLeftOutlined onClick={props.tTopMenuMode} className={'a'} style={{ color: '#77bbff', fontSize: '16px' }} />
             </Flex>
             <Dropdown classNames={{ itemTitle: '用户信息' }} menu={{ items: headerDropdown }} placement="bottomRight" arrow={true}>
                 <Avatar className={'a'} src={<img draggable={false} src={"https://www.wled.top/images/Oz-Vessalius-avatar.svg"} />} />

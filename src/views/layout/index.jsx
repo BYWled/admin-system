@@ -1,6 +1,7 @@
 import s from '../../styles/layout.module.scss'
 import LeftMenu from './leftMenu'
-import LayoutHeader from './header'
+import LeftHeader from './header'
+import MenuHeader from './menuHeader'
 import { Outlet } from 'react-router-dom'
 import { App, Layout, Tour, Input, Flex, Button } from 'antd';
 import { useState, useEffect } from 'react';
@@ -15,6 +16,7 @@ export default function layout() {
   const [lockScreen, setLockScreen] = useState(false);
   const [lockPassword, setLockPassword] = useState('');
   const [darkMode, setDarkMode] = useState(false);
+  const [topMenuMode, setTopMenuMode] = useState(false);
   const [nowTime, setNowTime] = useState(new Date().toLocaleTimeString());
   const navigate = useNavigate();
   const { message } = App.useApp();
@@ -76,6 +78,11 @@ export default function layout() {
     setDarkMode(!darkMode);
   }
 
+  // 切换顶部菜单模式
+  const tTopMenuMode = () => {
+    setTopMenuMode(!topMenuMode);
+  }
+
   // 退出登录函数
   const logout = () => {
     localStorage.removeItem('admin');
@@ -113,14 +120,19 @@ export default function layout() {
   return (
     <>
       {!lockScreen && <Layout>
-        <Sider className={s.leftMenu} collapsed={collapsed}>
-          <LeftMenu collapsed={collapsed} darkMode={darkMode} />
-        </Sider>
-        <Layout>
+        {
+          !topMenuMode && <Sider className={s.leftMenu} collapsed={collapsed}>
+            <LeftMenu collapsed={collapsed} darkMode={darkMode} />
+          </Sider>
+        }
+        <Layout className={s.layoutMain}>
           <Header className={s.layoutHeader}>
-            <LayoutHeader tCollapsed={setCollapsed} collapsed={collapsed} tLockScreen={(password) => onLockScreen(password)} lockScreen={lockScreen} darkMode={darkMode} tDarkMode={tDarkMode} logout={logout} />
+            {
+              topMenuMode ? <MenuHeader darkMode={darkMode} tDarkMode={tDarkMode} tTopMenuMode={tTopMenuMode} tLockScreen={(password) => onLockScreen(password)} lockScreen={lockScreen} logout={logout} /> :
+                <LeftHeader tCollapsed={setCollapsed} collapsed={collapsed} tLockScreen={(password) => onLockScreen(password)} lockScreen={lockScreen} darkMode={darkMode} tDarkMode={tDarkMode} tTopMenuMode={tTopMenuMode} logout={logout} />
+            }
           </Header>
-          <Content>
+          <Content className={s.layoutContent}>
             <Outlet />
           </Content>
           <Footer className={s.layoutFooter}>

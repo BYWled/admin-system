@@ -20,7 +20,6 @@ export default function LeftMenu(props) {
   useEffect(() => {
     // TODO: forEach无法返回新数组，需改用map+filter
     // TODO: 不能对react函数组件进行JSON深拷贝，会导致<icon />变成空对象导致无法传递
-    const deRouters = staticRouter.routes
     // 不传 element、path、hasErrorBoundary 等内部字段
     const menuItems = staticRouter.filter(item => item.key).map(item => {
       // children 为空判断
@@ -43,6 +42,8 @@ export default function LeftMenu(props) {
     props.collapsed ? setTitleText(false) : setTimeout(() => { setTitleText(true) }, 180);
   }, [props.collapsed]);
 
+  // ******************函数部分******************
+  // 获取当前展开的菜单id
   const currentOpenId = () => {
     // 找到当前已选中路径对应的菜单id
     const current = routers.find(item => item.key === matches[0].pathname + 's');  // 由于找的是组装的一级菜单key，所以可能会找不到的情况
