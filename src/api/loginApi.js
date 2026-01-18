@@ -6,6 +6,6 @@ export const loginApi = (data) => {
 }
 
 // 验证token接口
-export const verifyTokenApi = (token) => {
-    return service.get('/users/checktoken', { params: token });
+export const verifyTokenApi = (params) => {
+    return service.get('/users/checktoken', { params });
 } 

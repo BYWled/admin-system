@@ -1,5 +1,5 @@
-import { MenuUnfoldOutlined, MenuFoldOutlined, LogoutOutlined, LockOutlined, MoonOutlined, SunOutlined, BorderLeftOutlined } from '@ant-design/icons'
-import { Button, Flex, Avatar, Dropdown, Breadcrumb, ConfigProvider, Modal, Input } from 'antd'
+import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons'
+import { Button, Flex, Avatar, Breadcrumb, ConfigProvider } from 'antd'
 import { useState, useEffect } from 'react'
 import { staticRouter } from '../../router/index.jsx'
 import s from '../../styles/layout.module.scss'
@@ -7,32 +7,7 @@ import s from '../../styles/layout.module.scss'
 export default function LeftHeader(props) {
     // ******************初始化变量、Hooks******************
     const [collapsed, setCollapsed] = useState(props.collapsed || false);
-    const [lockDialogVisible, setLockDialogVisible] = useState(false);
-    const [lockPassword, setLockPassword] = useState('');
     const [nowUrl, setNowUrl] = useState([]);
-    const { id, role } = localStorage.getItem('admin') ? JSON.parse(localStorage.getItem('admin')) : {};
-    const headerDropdown = [
-        {
-            key: '1',
-            label: `id: ${id}`,
-            disabled: true,
-        },
-        {
-            key: '1-2',
-            label: `角色: ${role}`,
-            disabled: true,
-        },
-        {
-            type: 'divider',
-        },
-        {
-            key: '2',
-            label: '注销',
-            icon: <LogoutOutlined />,
-            danger: true,
-            onClick: props.logout,
-        },
-    ]
 
     // ******************副作用函数部分，用作生命周期与监听******************
     // 载入当前路径面包屑导航
@@ -74,12 +49,6 @@ export default function LeftHeader(props) {
         if (props.tCollapsed) props.tCollapsed(!collapsed);
     }
 
-    // 确认锁屏
-    const confirmLock = () => {
-        if (props.tLockScreen) props.tLockScreen(lockPassword);
-        setLockDialogVisible(false);
-    }
-
     return (
         <Flex justify="space-between" align="center" gap="large" style={{ width: '100%' }}>
             <Button type="primary" onClick={toggleCollapsed} className="menuBtn" >
@@ -100,30 +69,10 @@ export default function LeftHeader(props) {
             >
                 <Breadcrumb items={nowUrl} separator=">" className={s.headerBreadCrumb} />
             </ConfigProvider>
-            <Flex className={s.headerIcons} align="center">
-                <LockOutlined onClick={() => setLockDialogVisible(true)} className={'a'} style={{ color: '#77bbff', fontSize: '16px' }} />
-                <Modal
-                    open={lockDialogVisible}
-                    title="锁屏"
-                    onOk={confirmLock}
-                    okText="确认并锁屏"
-                    closable={false}
-                    onCancel={() => setLockDialogVisible(false)}
-                    cancelText="取消"
-                >
-                    <Input.Password value={lockPassword} onChange={e => setLockPassword(e.target.value)} placeholder="请输入锁屏密码" />
-                </Modal>
-                {
-                    props.darkMode ?
-                        <MoonOutlined onClick={props.tDarkMode} className={'a'} style={{ color: '#bb9955', fontSize: '16px' }} />
-                        :
-                        <SunOutlined onClick={props.tDarkMode} className={'a'} style={{ color: '#bb9955', fontSize: '16px' }} />
-                }
-                <BorderLeftOutlined onClick={props.tTopMenuMode} className={'a'} style={{ color: '#77bbff', fontSize: '16px' }} />
+            <Flex className={s.headerIcons} align="center" gap="small">
+                <span style={props.darkMode ? { color: '#eee' } : { color: '#111' }}>{props.time.toLocaleString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</span>
+                <Avatar onClick={props.tRightMenu} className={'a'} src={<img draggable={false} src={"https://www.wled.top/images/Oz-Vessalius-avatar.svg"} />} />
             </Flex>
-            <Dropdown classNames={{ itemTitle: '用户信息' }} menu={{ items: headerDropdown }} placement="bottomRight" arrow={true}>
-                <Avatar className={'a'} src={<img draggable={false} src={"https://www.wled.top/images/Oz-Vessalius-avatar.svg"} />} />
-            </Dropdown>
         </Flex >
     )
 }

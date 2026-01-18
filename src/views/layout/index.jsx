@@ -1,10 +1,11 @@
 import s from '../../styles/layout.module.scss'
 import LeftMenu from './leftMenu'
+import RightMenu from './rightMenu'
 import LeftHeader from './header'
 import MenuHeader from './menuHeader'
 import { Outlet } from 'react-router-dom'
 import { App, Layout, Tour, Input, Flex, Button } from 'antd';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { md5 } from 'js-md5';
 import { useNavigate } from 'react-router-dom';
 
@@ -13,11 +14,13 @@ export default function layout() {
   // ******************初始化变量、Hooks******************
   const { Header, Footer, Sider, Content } = Layout;
   const [collapsed, setCollapsed] = useState(false);
+  const [rightMenu, setRightMenu] = useState(false);
   const [lockScreen, setLockScreen] = useState(false);
   const [lockPassword, setLockPassword] = useState('');
   const [darkMode, setDarkMode] = useState(false);
   const [topMenuMode, setTopMenuMode] = useState(false);
-  const [nowTime, setNowTime] = useState(new Date().toLocaleTimeString());
+  const [time, setTime] = useState(Temporal.Now.zonedDateTimeISO());
+  const [ms, setMs] = useState(0);
   const navigate = useNavigate();
   const { message } = App.useApp();
   // ******************副作用函数部分，用作生命周期与监听******************
@@ -29,15 +32,11 @@ export default function layout() {
 
   // 锁屏时更新时间
   useEffect(() => {
-    let time;
-    setNowTime(new Date().toLocaleTimeString());
-    if (lockScreen)
-      time = setInterval(() => {
-        setNowTime(new Date().toLocaleTimeString());
-      }, 1000);
-    // TODO: 副作用return顺带清理定时器，计时器会在不需要时自动停止
-    return () => clearInterval(time);
-  }, [lockScreen]);
+    const nowTime = setInterval(() => {
+      setMs(tick());
+    }, ms);
+    return () => clearTimeout(nowTime);
+  }, []);
 
   // 切换暗黑模式
   useEffect(() => {
@@ -53,6 +52,23 @@ export default function layout() {
   }, [darkMode]);
 
   // ******************函数部分******************
+  const tick = () => {
+    const now = Temporal.Now.zonedDateTimeISO(); // TODO: 每次获取最新时间
+    setTime(now);
+
+    // 1. 创建一个当前秒数 +1 的时间点，计算当前距离的微秒和纳秒
+    const nextSecond = now.add({ seconds: 1 }).round({
+      smallestUnit: 'second', // 取到秒
+      roundingMode: 'floor' // 向下取整
+    });
+
+    // 2. 计算差值
+    const msUntilNextSecond = now.until(nextSecond).total({ unit: 'millisecond' }); // 转为毫秒
+
+    // 3. 动态设定下一次执行的时间，确保刚好在现实翻秒时触发
+    return msUntilNextSecond;
+  };
+
   // 锁屏函数
   const onLockScreen = (password) => {
     const lsAdmin = { ...JSON.parse(localStorage.getItem('admin')), lockScreen: true, lockPassword: md5(password) };
@@ -67,7 +83,6 @@ export default function layout() {
       localStorage.setItem('admin', JSON.stringify(newAdmin));
       setLockScreen(false);
       setLockPassword('');
-      clearInterval();
     } else {
       message.error('密码错误，请重新输入！');
     }
@@ -81,6 +96,11 @@ export default function layout() {
   // 切换顶部菜单模式
   const tTopMenuMode = () => {
     setTopMenuMode(!topMenuMode);
+  }
+
+  // 右侧菜单切换函数
+  const tRightMenu = () => {
+    setRightMenu(!rightMenu);
   }
 
   // 退出登录函数
@@ -97,7 +117,7 @@ export default function layout() {
       description: (
         <div style={{ textAlign: 'center' }}>
           <p style={{ fontSize: '10vh', fontWeight: 'bold', margin: '20px 0', fontFamily: 'Roboto Mono' }}>
-            {nowTime}
+            {time.toLocaleString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
           </p>
           <Input.Password
             size="large"
@@ -128,8 +148,8 @@ export default function layout() {
         <Layout className={s.layoutMain}>
           <Header className={s.layoutHeader}>
             {
-              topMenuMode ? <MenuHeader darkMode={darkMode} tDarkMode={tDarkMode} tTopMenuMode={tTopMenuMode} tLockScreen={(password) => onLockScreen(password)} lockScreen={lockScreen} logout={logout} /> :
-                <LeftHeader tCollapsed={setCollapsed} collapsed={collapsed} tLockScreen={(password) => onLockScreen(password)} lockScreen={lockScreen} darkMode={darkMode} tDarkMode={tDarkMode} tTopMenuMode={tTopMenuMode} logout={logout} />
+              topMenuMode ? <MenuHeader time={time} rightMenu={rightMenu} tRightMenu={tRightMenu} darkMode={darkMode} /> :
+                <LeftHeader time={time} rightMenu={rightMenu} tRightMenu={tRightMenu} tCollapsed={setCollapsed} collapsed={collapsed} darkMode={darkMode} />
             }
           </Header>
           <Content className={s.layoutContent}>
@@ -137,6 +157,7 @@ export default function layout() {
           </Content>
           <Footer className={s.layoutFooter}>
             <Flex justify='center' align='center' style={{ width: '100%' }}>
+              <span>右菜单状态：{rightMenu ? '打开' : '关闭'}</span>
               <span className='a' onClick={() => window.open('https://github.com/BYWled/admin-system', '_blank')}>admin-system</span>
               <span>&nbsp;©2026 Created by&nbsp;</span>
               <span className='a' onClick={() => window.open('https://github.com/BYWled', '_blank')}>BYWled</span>
@@ -144,6 +165,9 @@ export default function layout() {
           </Footer>
         </Layout>
       </Layout>}
+      {/* 右菜单 */}
+      <RightMenu time={time} rightMenu={rightMenu} tRightMenu={tRightMenu} darkMode={darkMode} tDarkMode={tDarkMode} topMenuMode={topMenuMode} tTopMenuMode={tTopMenuMode} lockScreen={lockScreen} tLockScreen={(password) => onLockScreen(password)} logout={logout} />
+      {/* 锁屏部分 */}
       <Tour open={lockScreen} steps={lock} mask={false} keyboard={false} arrow={false} closeIcon={false} classNames={{ root: s.lockRoot, mask: s.lockMask, section: s.lockSection }} />
     </>
   )

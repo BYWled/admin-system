@@ -1,5 +1,4 @@
-import { LogoutOutlined, LockOutlined, MoonOutlined, SunOutlined, BorderTopOutlined } from '@ant-design/icons'
-import { Flex, Avatar, Dropdown, Modal, Input, Menu } from 'antd'
+import { Flex, Avatar, Menu } from 'antd'
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { staticRouter } from '../../router/index.jsx'
@@ -11,31 +10,6 @@ export default function MenuHeader(props) {
     const location = useLocation();
     const [routers, setRouters] = useState([]);
     const [selectedKeys, setSelectedKeys] = useState([location.pathname]);
-    const [lockDialogVisible, setLockDialogVisible] = useState(false);
-    const [lockPassword, setLockPassword] = useState('');
-    const { id, role } = localStorage.getItem('admin') ? JSON.parse(localStorage.getItem('admin')) : {};
-    const headerDropdown = [
-        {
-            key: '1',
-            label: `id: ${id}`,
-            disabled: true,
-        },
-        {
-            key: '1-2',
-            label: `角色: ${role}`,
-            disabled: true,
-        },
-        {
-            type: 'divider',
-        },
-        {
-            key: '2',
-            label: '注销',
-            icon: <LogoutOutlined />,
-            danger: true,
-            onClick: props.logout,
-        },
-    ]
 
     // ******************副作用函数部分，用作生命周期与监听******************
     // 载入菜单时，格式化路由数据
@@ -65,12 +39,6 @@ export default function MenuHeader(props) {
         setSelectedKeys([keyPath[0]]);
     };
 
-    // 确认锁屏
-    const confirmLock = () => {
-        if (props.tLockScreen) props.tLockScreen(lockPassword);
-        setLockDialogVisible(false);
-    }
-
     return (
         <Flex justify="space-between" align="center" gap="large" style={{ width: '100%', height: '100%' }}>
             <Flex justify="center" align="center" className={s.menuLogo}>
@@ -85,30 +53,8 @@ export default function MenuHeader(props) {
                 items={routers}
                 onClick={changeRouter}
             />
-            <Flex className={s.headerIcons} align="center">
-                <LockOutlined onClick={() => setLockDialogVisible(true)} className={'a'} style={{ color: '#77bbff', fontSize: '16px' }} />
-                <Modal
-                    open={lockDialogVisible}
-                    title="锁屏"
-                    onOk={confirmLock}
-                    okText="确认并锁屏"
-                    closable={false}
-                    onCancel={() => setLockDialogVisible(false)}
-                    cancelText="取消"
-                >
-                    <Input.Password value={lockPassword} onChange={e => setLockPassword(e.target.value)} placeholder="请输入锁屏密码" />
-                </Modal>
-                {
-                    props.darkMode ?
-                        <MoonOutlined onClick={props.tDarkMode} className={'a'} style={{ color: '#bb9955', fontSize: '16px' }} />
-                        :
-                        <SunOutlined onClick={props.tDarkMode} className={'a'} style={{ color: '#bb9955', fontSize: '16px' }} />
-                }
-                <BorderTopOutlined onClick={props.tTopMenuMode} className={'a'} style={{ color: '#77bbff', fontSize: '16px' }} />
-            </Flex>
-            <Dropdown classNames={{ itemTitle: '用户信息' }} menu={{ items: headerDropdown }} placement="bottomRight" arrow={true}>
-                <Avatar className={'a'} src={<img draggable={false} src={"https://www.wled.top/images/Oz-Vessalius-avatar.svg"} />} />
-            </Dropdown>
+            <span>{props.time.toLocaleString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</span>
+            <Avatar onClick={props.tRightMenu} className={'a'} src={<img draggable={false} src={"https://www.wled.top/images/Oz-Vessalius-avatar.svg"} />} />
         </Flex >
     )
 }
