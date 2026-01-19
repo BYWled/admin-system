@@ -52,20 +52,18 @@ export default function layout() {
   }, [darkMode]);
 
   // ******************函数部分******************
+  // 实时时间更新函数
   const tick = () => {
     const now = Temporal.Now.zonedDateTimeISO(); // TODO: 每次获取最新时间
     setTime(now);
-
-    // 1. 创建一个当前秒数 +1 的时间点，计算当前距离的微秒和纳秒
+    // 创建一个当前秒数 +1 的时间点，计算当前距离的微秒和纳秒
     const nextSecond = now.add({ seconds: 1 }).round({
       smallestUnit: 'second', // 取到秒
       roundingMode: 'floor' // 向下取整
     });
-
-    // 2. 计算差值
+    // 计算差值
     const msUntilNextSecond = now.until(nextSecond).total({ unit: 'millisecond' }); // 转为毫秒
-
-    // 3. 动态设定下一次执行的时间，确保刚好在现实翻秒时触发
+    // 动态设定下一次执行的时间，确保刚好在现实翻秒时触发
     return msUntilNextSecond;
   };
 
@@ -157,7 +155,6 @@ export default function layout() {
           </Content>
           <Footer className={s.layoutFooter}>
             <Flex justify='center' align='center' style={{ width: '100%' }}>
-              <span>右菜单状态：{rightMenu ? '打开' : '关闭'}</span>
               <span className='a' onClick={() => window.open('https://github.com/BYWled/admin-system', '_blank')}>admin-system</span>
               <span>&nbsp;©2026 Created by&nbsp;</span>
               <span className='a' onClick={() => window.open('https://github.com/BYWled', '_blank')}>BYWled</span>

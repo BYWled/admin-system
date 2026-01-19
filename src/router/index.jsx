@@ -2,10 +2,7 @@ import { createHashRouter, useNavigate, useLocation } from 'react-router-dom'
 import Login from '../views/login/index.jsx'
 import Layout from '../views/layout/index.jsx'
 import Home from '../views/home/index.jsx'
-import UserList from '../views/user/list.jsx'
-import UserAdd from '../views/user/add.jsx'
-import UserEdit from '../views/user/edit.jsx'
-import UserInfo from '../views/user/info.jsx'
+import User from '../views/user/index.jsx'
 import GoodsList from '../views/goods/list.jsx'
 import GoodsAdd from '../views/goods/add.jsx'
 import GoodsClassify from '../views/goods/classify.jsx'
@@ -139,7 +136,7 @@ export const staticRouter = [
     // 用户管理
     {
         id: 2,
-        key: '/users',
+        key: '/user',
         path: '/user',
         label: '用户管理',
         icon: <TeamOutlined />,
@@ -147,31 +144,7 @@ export const staticRouter = [
         children: [
             {
                 index: true,
-                element: <UserList />,
-                id: 21,
-                key: '/user',
-                label: '用户列表'
-            },
-            {
-                path: 'add',
-                element: <UserAdd />,
-                id: 22,
-                key: '/user/add',
-                label: '添加用户'
-            },
-            {
-                path: 'edit',
-                element: <UserEdit />,
-                id: 23,
-                key: '/user/edit',
-                label: '编辑用户'
-            },
-            {
-                path: 'info',
-                element: <UserInfo />,
-                id: 24,
-                key: '/user/info',
-                label: '用户信息'
+                element: <User />,
             }
         ]
     },

@@ -6,7 +6,6 @@
 .leftMenu {
     background-color: var(--backColor);
     height: 100vh;
-    box-shadow: 0 0 2px rgba(192, 192, 192, 0.3);
 }
 
 .menuLogo {
@@ -36,14 +35,13 @@
     .headerBreadCrumb {
         flex: 1;
     }
-
-    .headerIcons {
-        gap: 2vh;
-    }
 }
 
 .layoutContent {
     flex: 1;
+    background-color: color-mix(in srgb, var(--backColor) 80%, #eee);
+    color: var(--textColor);
+    padding: 20px;
 }
 
 .layoutFooter {
