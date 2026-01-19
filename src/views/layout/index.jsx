@@ -20,7 +20,7 @@ export default function layout() {
   const [darkMode, setDarkMode] = useState(false);
   const [topMenuMode, setTopMenuMode] = useState(false);
   const [time, setTime] = useState(Temporal.Now.zonedDateTimeISO());
-  const [ms, setMs] = useState(0);
+  const timerRef = useRef(null); // TODO:使用 ref 存储定时器 ID，避免重复创建：使用useSate会在数据更新时再次渲染组件，导致定时器重复创建，从而导致内存溢出
   const navigate = useNavigate();
   const { message } = App.useApp();
   // ******************副作用函数部分，用作生命周期与监听******************
@@ -30,12 +30,31 @@ export default function layout() {
     if (lsAdmin.lockScreen) setLockScreen(true);
   }, []);
 
-  // 锁屏时更新时间
+  // 锁屏时更新时间 
   useEffect(() => {
-    const nowTime = setInterval(() => {
-      setMs(tick());
-    }, ms);
-    return () => clearTimeout(nowTime);
+    const scheduleNextTick = () => {
+      const now = Temporal.Now.zonedDateTimeISO(); // TODO: 每次获取最新时间
+      setTime(now);
+      // 计算到下一秒的毫秒数
+      const nextSecond = now.add({ seconds: 1 }).round({
+        smallestUnit: 'second',
+        roundingMode: 'floor'
+      });
+      const msUntilNextSecond = now.until(nextSecond).total({ unit: 'millisecond' });
+      // 使用 setTimeout 递归调度，动态计算下次执行时间，确保每次只有一个定时器
+      timerRef.current = setTimeout(scheduleNextTick, msUntilNextSecond);
+    };
+
+    // 立即执行第一次
+    scheduleNextTick();
+
+    // 清理函数：组件卸载时清除定时器
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
   }, []);
 
   // 切换暗黑模式
@@ -52,21 +71,6 @@ export default function layout() {
   }, [darkMode]);
 
   // ******************函数部分******************
-  // 实时时间更新函数
-  const tick = () => {
-    const now = Temporal.Now.zonedDateTimeISO(); // TODO: 每次获取最新时间
-    setTime(now);
-    // 创建一个当前秒数 +1 的时间点，计算当前距离的微秒和纳秒
-    const nextSecond = now.add({ seconds: 1 }).round({
-      smallestUnit: 'second', // 取到秒
-      roundingMode: 'floor' // 向下取整
-    });
-    // 计算差值
-    const msUntilNextSecond = now.until(nextSecond).total({ unit: 'millisecond' }); // 转为毫秒
-    // 动态设定下一次执行的时间，确保刚好在现实翻秒时触发
-    return msUntilNextSecond;
-  };
-
   // 锁屏函数
   const onLockScreen = (password) => {
     const lsAdmin = { ...JSON.parse(localStorage.getItem('admin')), lockScreen: true, lockPassword: md5(password) };
