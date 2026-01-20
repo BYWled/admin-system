@@ -48,25 +48,30 @@
     height: 3%;
 }
 
-.menuThemeBox {
-    position: relative;
-    width: 48%;
-    cursor: pointer;
-    box-sizing: border-box;
-    border-radius: 6px;
-    padding: 12px 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.3s;
-}
+.rightMenuCardArea {
+    flex: 1;
+    overflow-y: auto;
+    /* 隐藏 IE/Edge 滚动条 */
+    -ms-overflow-style: none;
+    /* 隐藏 Firefox 滚动条 */
+    scrollbar-width: none;
 
-.menuCheckout {
-    position: absolute;
-    bottom: 8px;
-    right: 8px;
-    color: #1677ff;
+    .menuThemeBox {
+        position: relative;
+        width: 46%;
+        cursor: pointer;
+        box-sizing: border-box;
+        border-radius: 6px;
+        padding: 6% 3%;
+        transition: all 0.3s;
+    }
+
+    .menuCheckout {
+        position: absolute;
+        bottom: 3%;
+        right: 2%;
+        color: #1677ff;
+    }
 }
 
 .lockRoot {

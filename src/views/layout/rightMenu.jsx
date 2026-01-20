@@ -121,7 +121,7 @@ export default function RightMenu(props) {
     }
 
     return <Drawer open={props.rightMenu} onClose={props.tRightMenu} closable={false} destroyOnHidden={true} mask={{ blur: false }} placement="right"
-        size={'40vh'} title="关于" footer={null}
+        size={'20vw'} title="设置" footer={null}
         styles={{
             section: {
                 color: 'var(--textColor)',
@@ -130,7 +130,8 @@ export default function RightMenu(props) {
             body: { paddingTop: '0' }
         }}>
         <Flex vertical={true} justify='space-between' style={{ width: '100%', height: '100%' }}>
-            <Flex vertical={true} style={{ flex: 1, gap: '2vh' }}>
+            {/* 卡片区域 */}
+            <Flex vertical={true} gap="2vh" className={s.rightMenuCardArea}>
                 {/* 时间显示 */}
                 <p style={{ fontSize: '5vh', fontWeight: 'bold', margin: '0', fontFamily: 'Roboto Mono' }}>
                     {props.time.toLocaleString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
@@ -155,7 +156,10 @@ export default function RightMenu(props) {
                     title="主题设置"
                 >
                     <Flex gap="small" wrap justify="space-between">
-                        <div
+                        <Flex
+                            vertical={true}
+                            align="center"
+                            gap="8px"
                             onClick={() => props.darkMode && props.tDarkMode()}
                             className={s.menuThemeBox}
                             style={{
@@ -165,8 +169,11 @@ export default function RightMenu(props) {
                             <SunFilled style={{ fontSize: '24px', color: !props.darkMode ? '#1677ff' : 'inherit' }} />
                             <Text>亮色主题</Text>
                             {!props.darkMode && <CheckOutlined className={s.menuCheckout} />}
-                        </div>
-                        <div
+                        </Flex>
+                        <Flex
+                            vertical={true}
+                            align="center"
+                            gap="8px"
                             onClick={() => !props.darkMode && props.tDarkMode()}
                             className={s.menuThemeBox}
                             style={{
@@ -176,8 +183,11 @@ export default function RightMenu(props) {
                             <MoonFilled style={{ fontSize: '24px', color: props.darkMode ? '#1677ff' : 'inherit' }} />
                             <Text>暗色主题</Text>
                             {props.darkMode && <CheckOutlined className={s.menuCheckout} />}
-                        </div>
-                        <div
+                        </Flex>
+                        <Flex
+                            vertical={true}
+                            align="center"
+                            gap="8px"
                             onClick={() => props.topMenuMode && props.tTopMenuMode()}
                             className={s.menuThemeBox}
                             style={{
@@ -187,8 +197,11 @@ export default function RightMenu(props) {
                             <BorderLeftOutlined style={{ fontSize: '24px', color: !props.topMenuMode ? '#1677ff' : 'inherit' }} />
                             <Text>左侧菜单</Text>
                             {!props.topMenuMode && <CheckOutlined className={s.menuCheckout} />}
-                        </div>
-                        <div
+                        </Flex>
+                        <Flex
+                            vertical={true}
+                            align="center"
+                            gap="8px"
                             onClick={() => !props.topMenuMode && props.tTopMenuMode()}
                             className={s.menuThemeBox}
                             style={{
@@ -198,11 +211,12 @@ export default function RightMenu(props) {
                             <BorderTopOutlined style={{ fontSize: '24px', color: props.topMenuMode ? '#1677ff' : 'inherit' }} />
                             <Text>顶部菜单</Text>
                             {props.topMenuMode && <CheckOutlined className={s.menuCheckout} />}
-                        </div>
+                        </Flex>
                     </Flex>
                 </Card>
             </Flex>
 
+            {/* 按钮区域 */}
             <Flex vertical={true} justify="space-between" gap='small' style={{ width: '100%' }}>
                 <Button color="primary" variant="outlined" icon={<LockOutlined />} onClick={() => setLockDialogVisible(true)}>锁定屏幕</Button>
                 <Modal

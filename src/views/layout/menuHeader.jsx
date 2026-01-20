@@ -1,4 +1,5 @@
 import { Flex, Avatar, Menu } from 'antd'
+import { SettingTwoTone } from '@ant-design/icons'
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { staticRouter } from '../../router/index.jsx'
@@ -53,8 +54,10 @@ export default function MenuHeader(props) {
                 items={routers}
                 onClick={changeRouter}
             />
-            <span>{props.time.toLocaleString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</span>
-            <Avatar onClick={props.tRightMenu} className={'a'} src={<img draggable={false} src={"https://www.wled.top/images/Oz-Vessalius-avatar.svg"} />} />
-        </Flex >
+            <Flex className={s.headerIcons} align="center" gap="small">
+                <span>{props.time.toLocaleString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</span>
+                <SettingTwoTone style={{ fontSize: '21px' }} onClick={props.tRightMenu} className={'a'} />
+            </Flex>
+        </Flex>
     )
 }

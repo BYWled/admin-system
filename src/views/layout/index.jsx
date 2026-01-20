@@ -30,23 +30,25 @@ export default function layout() {
     if (lsAdmin.lockScreen) setLockScreen(true);
   }, []);
 
-  // 锁屏时更新时间 
+  // 更新时间 
   useEffect(() => {
-    const scheduleNextTick = () => {
+    const nextTick = () => {
       const now = Temporal.Now.zonedDateTimeISO(); // TODO: 每次获取最新时间
       setTime(now);
       // 计算到下一秒的毫秒数
-      const nextSecond = now.add({ seconds: 1 }).round({
-        smallestUnit: 'second',
-        roundingMode: 'floor'
-      });
-      const msUntilNextSecond = now.until(nextSecond).total({ unit: 'millisecond' });
-      // 使用 setTimeout 递归调度，动态计算下次执行时间，确保每次只有一个定时器
-      timerRef.current = setTimeout(scheduleNextTick, msUntilNextSecond);
+      const nextSecond = now.add({ seconds: 1 }) // TODO:加一秒
+        .round({
+          smallestUnit: 'second', // 单位为秒
+          roundingMode: 'floor' // 向下取整
+        });
+      // 
+      const msUntilNextSecond = now.until(nextSecond).total({ unit: 'millisecond' }); // TODO:until 计算时间差并且返回新的 Temporal.Duration 对象，total 计算总毫秒数
+      // 使用 setTimeout 递归，动态计算下次执行时间，确保每次只有一个定时器
+      timerRef.current = setTimeout(nextTick, msUntilNextSecond);
     };
 
     // 立即执行第一次
-    scheduleNextTick();
+    nextTick();
 
     // 清理函数：组件卸载时清除定时器
     return () => {

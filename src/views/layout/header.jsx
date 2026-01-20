@@ -1,5 +1,5 @@
-import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons'
-import { Button, Flex, Avatar, Breadcrumb, ConfigProvider } from 'antd'
+import { MenuUnfoldOutlined, MenuFoldOutlined, SettingTwoTone } from '@ant-design/icons'
+import { Button, Flex, Breadcrumb, ConfigProvider } from 'antd'
 import { useState, useEffect } from 'react'
 import { staticRouter } from '../../router/index.jsx'
 import s from '../../styles/layout.module.scss'
@@ -71,7 +71,7 @@ export default function LeftHeader(props) {
             </ConfigProvider>
             <Flex className={s.headerIcons} align="center" gap="small">
                 <span style={props.darkMode ? { color: '#eee' } : { color: '#111' }}>{props.time.toLocaleString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</span>
-                <Avatar onClick={props.tRightMenu} className={'a'} src={<img draggable={false} src={"https://www.wled.top/images/Oz-Vessalius-avatar.svg"} />} />
+                <SettingTwoTone style={{ fontSize: '21px' }} onClick={props.tRightMenu} className={'a'} />
             </Flex>
         </Flex >
     )

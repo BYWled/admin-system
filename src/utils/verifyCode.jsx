@@ -56,7 +56,7 @@ export default function VCode(props) {
     if (!captcha) return null;
 
     // TODO:随机值每次渲染都会重新计算，React会在变化时重新渲染一次，导致疯狂变换。
-    return <div onClick={generateCode} style={{ cursor: 'pointer', height: '32px', width: '50%', padding: '1px', borderRadius: '4px', backgroundColor: bgColor, display: 'flex', alignItems: 'center', justifyContent: 'center', userSelect: 'none' }}>
+    return <div onClick={generateCode} className={"verifyCode a"} style={{ backgroundColor: bgColor }}>
         {
             captcha.split('').map((char, index) => (
                 <span key={index} style={charStyles[index] || { display: 'inline-block' }}>
