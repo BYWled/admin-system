@@ -4,7 +4,8 @@ import RightMenu from './rightMenu'
 import LeftHeader from './header'
 import MenuHeader from './menuHeader'
 import { Outlet } from 'react-router-dom'
-import { App, Layout, Tour, Input, Flex, Button } from 'antd';
+import { App, Layout, Tour, Input, Flex, Button, FloatButton } from 'antd';
+import { SettingOutlined } from '@ant-design/icons';
 import { useState, useEffect, useRef } from 'react';
 import { md5 } from 'js-md5';
 import { useNavigate } from 'react-router-dom';
@@ -19,6 +20,7 @@ export default function layout() {
   const [lockPassword, setLockPassword] = useState('');
   const [darkMode, setDarkMode] = useState(false);
   const [topMenuMode, setTopMenuMode] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
   const [time, setTime] = useState(Temporal.Now.zonedDateTimeISO());
   const timerRef = useRef(null); // TODO:使用 ref 存储定时器 ID，避免重复创建：使用useSate会在数据更新时再次渲染组件，导致定时器重复创建，从而导致内存溢出
   const navigate = useNavigate();
@@ -107,6 +109,12 @@ export default function layout() {
     setRightMenu(!rightMenu);
   }
 
+  // 全屏切换函数
+  const tFullscreen = () => {
+    setFullscreen(!fullscreen);
+    setRightMenu(false);
+  }
+
   // 退出登录函数
   const logout = () => {
     localStorage.removeItem('admin');
@@ -143,33 +151,50 @@ export default function layout() {
   ];
   return (
     <>
-      {!lockScreen && <Layout>
-        {
-          !topMenuMode && <Sider className={s.leftMenu} collapsed={collapsed}>
-            <LeftMenu collapsed={collapsed} darkMode={darkMode} />
-          </Sider>
-        }
-        <Layout className={s.layoutMain}>
-          <Header className={s.layoutHeader}>
-            {
-              topMenuMode ? <MenuHeader time={time} rightMenu={rightMenu} tRightMenu={tRightMenu} darkMode={darkMode} /> :
-                <LeftHeader time={time} rightMenu={rightMenu} tRightMenu={tRightMenu} tCollapsed={setCollapsed} collapsed={collapsed} darkMode={darkMode} />
-            }
-          </Header>
-          <Content className={s.layoutContent}>
-            <Outlet />
-          </Content>
-          <Footer className={s.layoutFooter}>
-            <Flex justify='center' align='center' style={{ width: '100%' }}>
-              <span className='a' onClick={() => window.open('https://github.com/BYWled/admin-system', '_blank')}>admin-system</span>
-              <span>&nbsp;©2026 Created by&nbsp;</span>
-              <span className='a' onClick={() => window.open('https://github.com/BYWled', '_blank')}>BYWled</span>
-            </Flex>
-          </Footer>
+      {
+        // 非全屏且非锁屏状态下的布局
+        !lockScreen && !fullscreen && <Layout>
+          {
+            !topMenuMode && <Sider className={s.leftMenu} collapsed={collapsed}>
+              <LeftMenu collapsed={collapsed} darkMode={darkMode} />
+            </Sider>
+          }
+          <Layout className={s.layoutMain}>
+            <Header className={s.layoutHeader}>
+              {
+                topMenuMode ? <MenuHeader time={time} rightMenu={rightMenu} tRightMenu={tRightMenu} darkMode={darkMode} /> :
+                  <LeftHeader time={time} rightMenu={rightMenu} tRightMenu={tRightMenu} tCollapsed={setCollapsed} collapsed={collapsed} darkMode={darkMode} />
+              }
+            </Header>
+            <Content className={s.layoutContent}>
+              <Outlet />
+              <FloatButton.BackTop />
+            </Content>
+            <Footer className={s.layoutFooter}>
+              <Flex justify='center' align='center' style={{ width: '100%' }}>
+                {/* TODO:_blank 新增标签页打开 */}
+                <span className='a' onClick={() => window.open('https://github.com/BYWled/admin-system', '_blank')}>admin-system</span>
+                <span>&nbsp;©2026 Created by&nbsp;</span>
+                <span className='a' onClick={() => window.open('https://github.com/BYWled', '_blank')}>BYWled</span>
+              </Flex>
+            </Footer>
+          </Layout>
         </Layout>
-      </Layout>}
+      }
+      { 
+        // 全屏状态下的布局
+        fullscreen && <Outlet />
+      }
+      {/* 全屏时显示设置悬浮 */}
+      {fullscreen && <FloatButton
+        icon={<SettingOutlined />}
+        onClick={tRightMenu}
+        content="设置"
+        shape="square"
+        className={'a'}
+      />}
       {/* 右菜单 */}
-      <RightMenu time={time} rightMenu={rightMenu} tRightMenu={tRightMenu} darkMode={darkMode} tDarkMode={tDarkMode} topMenuMode={topMenuMode} tTopMenuMode={tTopMenuMode} lockScreen={lockScreen} tLockScreen={(password) => onLockScreen(password)} logout={logout} />
+      <RightMenu time={time} rightMenu={rightMenu} tRightMenu={tRightMenu} darkMode={darkMode} tDarkMode={tDarkMode} topMenuMode={topMenuMode} tTopMenuMode={tTopMenuMode} fullscreen={fullscreen} tFullscreen={tFullscreen} lockScreen={lockScreen} tLockScreen={(password) => onLockScreen(password)} logout={logout} />
       {/* 锁屏部分 */}
       <Tour open={lockScreen} steps={lock} mask={false} keyboard={false} arrow={false} closeIcon={false} classNames={{ root: s.lockRoot, mask: s.lockMask, section: s.lockSection }} />
     </>

@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { loginApi } from '../../api/loginApi';
+import GitHubLogo from '../../assets/GitHub.svg'
 import s from '../../styles/login.module.scss'
 import VCode from '../../utils/verifyCode'
 import { App, Button, Form, Input, Typography, ConfigProvider, Divider, Flex, Avatar } from 'antd';
@@ -90,7 +91,7 @@ export default function Login() {
                     <Divider style={{ margin: '20px 0' }}>more</Divider>
                 </ConfigProvider>
                 <Flex gap={20} justify="center">
-                    <Avatar className='a' size={40} onClick={() => window.location.href = 'https://github.com/BYWled/admin-system'} src={<img draggable={false} src={"https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png"} alt="Github" />} />
+                    <Avatar className='a' size={40} onClick={() => window.location.href = 'https://github.com/BYWled/admin-system'} src={<img draggable={false} src={GitHubLogo} alt="Github" />} />
                     <Avatar className='a' size={40} onClick={() => window.location.href = 'https://gitee.com/BYWled/admin-system'} src={<img draggable={false} src={"https://gitee.com/static/images/gitee-logos/logo_gitee_g_red.svg"} alt="Gitee" />} />
                     <Avatar className='a' size={40} onClick={() => window.location.href = 'https://www.wled.top'}>BLOG</Avatar>
                 </Flex>

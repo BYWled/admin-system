@@ -1,5 +1,5 @@
 import { Flex, Avatar, Menu } from 'antd'
-import { SettingTwoTone } from '@ant-design/icons'
+import { SettingOutlined } from '@ant-design/icons'
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { staticRouter } from '../../router/index.jsx'
@@ -56,7 +56,7 @@ export default function MenuHeader(props) {
             />
             <Flex className={s.headerIcons} align="center" gap="small">
                 <span>{props.time.toLocaleString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</span>
-                <SettingTwoTone style={{ fontSize: '21px' }} onClick={props.tRightMenu} className={'a'} />
+                <SettingOutlined style={{ fontSize: '21px' }} onClick={props.tRightMenu} className={'a'} />
             </Flex>
         </Flex>
     )

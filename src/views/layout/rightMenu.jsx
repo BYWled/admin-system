@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { userInfoApi, checkPassApi, changePassApi } from '../../api/userApi'
 import VCode from '../../utils/verifyCode'
-import { LockOutlined, SunFilled, MoonFilled, BorderTopOutlined, BorderLeftOutlined, CheckOutlined, LogoutOutlined, EditOutlined } from '@ant-design/icons'
+import { LockOutlined, SunFilled, MoonFilled, BorderTopOutlined, BorderLeftOutlined, CheckOutlined, LogoutOutlined, EditOutlined, FullscreenOutlined } from '@ant-design/icons'
 import { App, Drawer, Flex, Modal, Input, Avatar, Card, Typography, Form, Button } from 'antd'
 import s from '../../styles/layout.module.scss'
 
@@ -154,6 +154,11 @@ export default function RightMenu(props) {
                     style={{ width: '100%' }}
                     type="inner"
                     title="主题设置"
+                    extra={<FullscreenOutlined
+                        style={{ color: props.fullscreen ? '#1677ff' : 'var(--textColor)' }}
+                        className={'a'}
+                        onClick={props.tFullscreen}
+                    />}
                 >
                     <Flex gap="small" wrap justify="space-between">
                         <Flex
