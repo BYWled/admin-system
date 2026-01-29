@@ -173,15 +173,27 @@ export default function layout() {
             <Footer className={s.layoutFooter}>
               <Flex justify='center' align='center' style={{ width: '100%' }}>
                 {/* TODO:_blank 新增标签页打开 */}
-                <span className='a' onClick={() => window.open('https://github.com/BYWled/admin-system', '_blank')}>admin-system</span>
+                <Button color="default" styles={{
+                  root: {
+                    padding: 0
+                  }
+                }}
+                  onClick={() => window.open('https://github.com/BYWled/admin-system', '_blank')}
+                  variant="link">admin-system Dev-01.30</Button>
                 <span>&nbsp;©2026 Created by&nbsp;</span>
-                <span className='a' onClick={() => window.open('https://github.com/BYWled', '_blank')}>BYWled</span>
+                <Button color="default" styles={{
+                  root: {
+                    padding: 0
+                  }
+                }}
+                  onClick={() => window.open('https://github.com/BYWled', '_blank')}
+                  variant="link">BYWled</Button>
               </Flex>
             </Footer>
           </Layout>
         </Layout>
       }
-      { 
+      {
         // 全屏状态下的布局
         fullscreen && <Outlet />
       }
