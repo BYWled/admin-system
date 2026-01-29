@@ -171,19 +171,21 @@ export default function layout() {
               <FloatButton.BackTop />
             </Content>
             <Footer className={s.layoutFooter}>
-              <Flex justify='center' align='center' style={{ width: '100%' }}>
+              <Flex justify='center' align='center' style={{ width: '100%', height: '100%' }}>
                 {/* TODO:_blank 新增标签页打开 */}
-                <Button color="default" styles={{
+                <Button color={darkMode ? "geekblue" : "default"} styles={{
                   root: {
-                    padding: 0
+                    height: '100%',
+                    padding: 0,
                   }
                 }}
                   onClick={() => window.open('https://github.com/BYWled/admin-system', '_blank')}
                   variant="link">admin-system Dev-01.30</Button>
                 <span>&nbsp;©2026 Created by&nbsp;</span>
-                <Button color="default" styles={{
+                <Button color={darkMode ? "geekblue" : "default"} styles={{
                   root: {
-                    padding: 0
+                    height: '100%',
+                    padding: 0,
                   }
                 }}
                   onClick={() => window.open('https://github.com/BYWled', '_blank')}
@@ -195,7 +197,10 @@ export default function layout() {
       }
       {
         // 全屏状态下的布局
-        fullscreen && <Outlet />
+        fullscreen && <Content className={s.layoutContent} style={{ height: '100vh', boxSizing: 'border-box' }}>
+          <Outlet />
+          <FloatButton.BackTop />
+        </Content>
       }
       {/* 全屏时显示设置悬浮 */}
       {fullscreen && <FloatButton
