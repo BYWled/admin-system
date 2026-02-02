@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { changePassApi } from '../../api/userApi';
 import { getUserApi, addUserApi, deleteUserApi, batchDeleteUserApi, editUserApi } from '../../api/userListApi';
 import { timeToDate } from '../../utils/time';
-import { App, Avatar, Button, Card, Flex, Table, Modal, Form, Input, Select, Popconfirm } from 'antd'
+import { App, Avatar, Button, Card, Flex, Table, Modal, Form, Input, Select, Popconfirm, Typography } from 'antd'
 import { UserOutlined, LockOutlined, CheckCircleOutlined } from '@ant-design/icons';
 
 export default function User() {
@@ -70,7 +70,7 @@ export default function User() {
         }
         message.success('用户已添加');
         getTableData();
-        form.resetFields();
+        form.resetFields(); // 重置表单
         setAddDia(false);
     }
 
@@ -176,23 +176,28 @@ export default function User() {
     return (
         <Card variant="borderless" style={{ width: '100%' }}>
             <Flex vertical justify="center" align="center" style={{ width: '100%' }} gap="small" >
-                <Flex justify="end" align="center" style={{ width: '100%' }} gap="small" >
-                    <Button color="cyan" variant="outlined" onClick={() => setAddDia(true)}>
-                        添加用户
-                    </Button>
-                    <Popconfirm
-                        title="警告"
-                        description="确定要删除选中用户吗？此操作不可撤销！"
-                        onConfirm={() => batchDeleteUser(selectedRowIds)}
-                        onCancel={null}
-                        okText="确认"
-                        okType="danger"
-                        cancelText="取消"
-                    >
-                        <Button color="danger" variant="outlined" disabled={selectedRowIds.length === 0}>
-                            批量删除
+                <Flex justify="space-between" align="center" style={{ width: '100%' }} >
+                    <Flex justify="start" align="center" style={{ width: '100%' }} gap="small" >
+                        <span>共</span><Typography.Text keyboard>{total}</Typography.Text><span>用户</span>
+                    </Flex>
+                    <Flex justify="end" align="center" style={{ width: '100%' }} gap="small" >
+                        <Button color="cyan" variant="outlined" onClick={() => setAddDia(true)}>
+                            添加用户
                         </Button>
-                    </Popconfirm>
+                        <Popconfirm
+                            title="警告"
+                            description="确定要删除选中用户吗？此操作不可撤销！"
+                            onConfirm={() => batchDeleteUser(selectedRowIds)}
+                            onCancel={null}
+                            okText="确认"
+                            okType="danger"
+                            cancelText="取消"
+                        >
+                            <Button color="danger" variant="outlined" disabled={selectedRowIds.length === 0}>
+                                批量删除
+                            </Button>
+                        </Popconfirm>
+                    </Flex>
                 </Flex>
                 <Table rowSelection={rowSelection} columns={columns} dataSource={dataSource} scroll={{ y: 55 * 8 }} pagination={{ pageSize, current: currentPage, total, pageSizeOptions: [10, 20, 50], onChange: (page) => setCurrentPage(page), onShowSizeChange: (current, size) => setPageSize(size) }} />
             </Flex>

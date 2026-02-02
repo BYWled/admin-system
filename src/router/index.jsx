@@ -4,7 +4,6 @@ import Layout from '../views/layout/index.jsx'
 import Home from '../views/home/index.jsx'
 import User from '../views/user/index.jsx'
 import GoodsList from '../views/goods/list.jsx'
-import GoodsAdd from '../views/goods/add.jsx'
 import GoodsClassify from '../views/goods/classify.jsx'
 import Order from '../views/order/index.jsx'
 import Store from '../views/store/index.jsx'
@@ -165,16 +164,9 @@ export const staticRouter = [
                 label: '商品列表'
             },
             {
-                path: 'add',
-                element: <GoodsAdd />,
-                id: 32,
-                key: '/goods/add',
-                label: '添加商品'
-            },
-            {
                 path: 'classify',
                 element: <GoodsClassify />,
-                id: 33,
+                id: 32,
                 key: '/goods/classify',
                 label: '商品分类'
             }
