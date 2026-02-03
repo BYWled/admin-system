@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { App, Form, Flex, Card, Button, Input, Popconfirm, Table, Typography, Modal, Radio } from 'antd';
+import { App, Form, Flex, Card, Button, Input, Popconfirm, Table, Modal, Radio, Pagination } from 'antd';
 import { getClassifyApi, addClassifyApi, editClassifyApi, deleteClassifyApi } from '../../api/classifyApi';
 import { FilterOutlined } from '@ant-design/icons';
 
@@ -14,6 +14,7 @@ export default function classify() {
     const isEditing = record => record.key === editingKey;
     const [addDia, setAddDia] = useState(false);
     const [confirmLoading, setConfirmLoading] = useState(false);
+    const [pageLoading, setPageLoading] = useState(true);
 
     // 表单提交按钮
     const SubmitButton = ({ form, children, loading }) => {
@@ -35,11 +36,15 @@ export default function classify() {
 
     // =========== 获取列表 ==============
     const getTableData = async () => {
+        setPageLoading(true);
         const res = await getClassifyApi({
             pageSize,
             currentPage
         });
         if (res.data && res.data.length === 0) {
+            setData([]);
+            setTotal(0);
+            setPageLoading(false);
             return message.error('获取分类列表失败');
         }
         const newData = res.data.map(item => ({
@@ -49,6 +54,7 @@ export default function classify() {
         setData([...newData]);
         setTotal(res.total);
         setConfirmLoading(false);
+        setPageLoading(false);
     }
 
     useEffect(() => {
@@ -236,15 +242,10 @@ export default function classify() {
 
     return <Card variant="borderless" style={{ width: '100%' }}>
         <Flex vertical justify="center" align="center" style={{ width: '100%' }} gap="small" >
-            <Flex justify="space-between" align="center" style={{ width: '100%' }} >
-                <Flex justify="start" align="center" style={{ width: '100%' }} gap="small" >
-                    <span>共</span><Typography.Text keyboard>{total}</Typography.Text><span>分类</span>
-                </Flex>
-                <Flex justify="end" align="center" style={{ width: '100%' }} gap="small" >
-                    <Button color="cyan" variant="outlined" onClick={() => setAddDia(true)}>
-                        添加分类
-                    </Button>
-                </Flex>
+            <Flex justify="end" align="center" style={{ width: '100%' }} gap="small" >
+                <Button color="cyan" variant="outlined" disabled={editingKey !== ''} onClick={() => setAddDia(true)}>
+                    添加分类
+                </Button>
             </Flex>
             <Form form={form} component={false}>
                 <Table
@@ -255,10 +256,29 @@ export default function classify() {
                     dataSource={data}
                     columns={mergedColumns}
                     rowClassName="editable-row"
+                    loading={pageLoading}
                     scroll={{ y: 55 * 8, x: 'max-content' }}
-                    pagination={{ pageSize, current: currentPage, total, pageSizeOptions: [10, 20, 50], onChange: (page) => setCurrentPage(page), onShowSizeChange: (current, size) => setPageSize(size) }}
-                />
+                    pagination={false} />
             </Form>
+            <Flex justify="center" align="center" style={{ width: '100%' }} >
+                <Pagination
+                    total={total}
+                    showTotal={total => `共 ${total} 条`}
+                    pageSize={pageSize}
+                    current={currentPage}
+                    showSizeChanger
+                    pageSizeOptions={['10', '20', '50']}
+                    showQuickJumper
+                    onChange={(page, size) => {
+                        setCurrentPage(page);
+                        setPageSize(size);
+                    }}
+                    onShowSizeChange={(current, size) => {
+                        setCurrentPage(1);
+                        setPageSize(size);
+                    }}
+                />
+            </Flex>
         </Flex>
         {/* 添加 */}
         <Modal

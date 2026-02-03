@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 import { changePassApi } from '../../api/userApi';
 import { getUserApi, addUserApi, deleteUserApi, batchDeleteUserApi, editUserApi } from '../../api/userListApi';
 import { timeToDate } from '../../utils/time';
-import { App, Avatar, Button, Card, Flex, Table, Modal, Form, Input, Select, Popconfirm, Typography } from 'antd'
+import { App, Avatar, Button, Card, Flex, Table, Modal, Form, Input, Select, Popconfirm, Pagination } from 'antd'
 import { UserOutlined, LockOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import VCode from '../../utils/verifyCode';
 
 export default function User() {
     const [selectedRowIds, setSelectedRowIds] = useState([]);
@@ -11,12 +12,21 @@ export default function User() {
     const [currentPage, setCurrentPage] = useState(1);
     const [total, setTotal] = useState(0);
     const [tableData, setTableData] = useState([]);
+    const [pageLoading, setPageLoading] = useState(false);
     const [confirmLoading, setConfirmLoading] = useState(false); // 通用确认加载状态，一般仅有一个弹窗
     const [addDia, setAddDia] = useState(false);
     const [editDia, setEditDia] = useState(false);
     const [editForm, setEditForm] = useState({});
     const { message } = App.useApp();
     const [form] = Form.useForm();
+
+    // 验证码部分
+    const [captcha, setCaptcha] = useState('');
+    const [fresh, setFresh] = useState(0); // 用于刷新验证码
+    // 刷新验证码
+    useEffect(() => {
+        setFresh(fresh + 1);
+    }, []);
 
     // 表单提交按钮
     const SubmitButton = ({ form, children, loading }) => {
@@ -38,15 +48,20 @@ export default function User() {
 
     // =========== 获取用户列表 ==============
     const getTableData = async () => {
+        setPageLoading(true);
         const res = await getUserApi({
             pageSize,
             currentPage
         });
         if (res.data && res.data.length === 0) {
+            setTableData([]);
+            setTotal(0);
+            setPageLoading(false);
             return message.error('获取用户列表失败');
         }
         setTableData(res.data);
         setTotal(res.total);
+        setPageLoading(false);
         setConfirmLoading(false);
     }
 
@@ -58,6 +73,13 @@ export default function User() {
     // 添加用户接口
     const addUser = async (values) => {
         setConfirmLoading(true);
+        // 验证码验证
+        if (values.inCaptcha.toLowerCase() !== captcha.toLowerCase()) {
+            message.error('验证码错误');
+            setConfirmLoading(false);
+            setFresh(fresh + 1);
+            return;
+        }
         const res = await addUserApi({
             account: values.account,
             password: values.password,
@@ -104,6 +126,13 @@ export default function User() {
     }
     const editUser = async (values) => {
         setConfirmLoading(true);
+        // 验证码验证
+        if (values.inCaptcha.toLowerCase() !== captcha.toLowerCase()) {
+            message.error('验证码错误');
+            setConfirmLoading(false);
+            setFresh(fresh + 1);
+            return;
+        }
         // 先判断是否修改密码
         if (values.oldPwd) {
             const res = await changePassApi({
@@ -141,7 +170,7 @@ export default function User() {
         { title: '用户名', dataIndex: 'name' },
         { title: '身份组', dataIndex: 'group' },
         { title: '注册时间', dataIndex: 'time' },
-        { title: '操作', dataIndex: 'action' }
+        { title: '操作', dataIndex: 'action', fixed: 'end', width: 180 }
     ];
     const dataSource = tableData.map((item) => ({
         key: item.id,
@@ -176,30 +205,44 @@ export default function User() {
     return (
         <Card variant="borderless" style={{ width: '100%' }}>
             <Flex vertical justify="center" align="center" style={{ width: '100%' }} gap="small" >
-                <Flex justify="space-between" align="center" style={{ width: '100%' }} >
-                    <Flex justify="start" align="center" style={{ width: '100%' }} gap="small" >
-                        <span>共</span><Typography.Text keyboard>{total}</Typography.Text><span>用户</span>
-                    </Flex>
-                    <Flex justify="end" align="center" style={{ width: '100%' }} gap="small" >
-                        <Button color="cyan" variant="outlined" onClick={() => setAddDia(true)}>
-                            添加用户
+                <Flex justify="end" align="center" style={{ width: '100%' }} gap="small" >
+                    <Button color="cyan" variant="outlined" onClick={() => setAddDia(true)}>
+                        添加用户
+                    </Button>
+                    <Popconfirm
+                        title="警告"
+                        description="确定要删除选中用户吗？此操作不可撤销！"
+                        onConfirm={() => batchDeleteUser(selectedRowIds)}
+                        onCancel={null}
+                        okText="确认"
+                        okType="danger"
+                        cancelText="取消"
+                    >
+                        <Button color="danger" variant="outlined" disabled={selectedRowIds.length === 0}>
+                            批量删除
                         </Button>
-                        <Popconfirm
-                            title="警告"
-                            description="确定要删除选中用户吗？此操作不可撤销！"
-                            onConfirm={() => batchDeleteUser(selectedRowIds)}
-                            onCancel={null}
-                            okText="确认"
-                            okType="danger"
-                            cancelText="取消"
-                        >
-                            <Button color="danger" variant="outlined" disabled={selectedRowIds.length === 0}>
-                                批量删除
-                            </Button>
-                        </Popconfirm>
-                    </Flex>
+                    </Popconfirm>
                 </Flex>
-                <Table rowSelection={rowSelection} columns={columns} dataSource={dataSource} scroll={{ y: 55 * 8 }} pagination={{ pageSize, current: currentPage, total, pageSizeOptions: [10, 20, 50], onChange: (page) => setCurrentPage(page), onShowSizeChange: (current, size) => setPageSize(size) }} />
+                <Table rowSelection={rowSelection} columns={columns} dataSource={dataSource} loading={pageLoading} scroll={{ y: 55 * 8, x: 'max-content' }} pagination={false} />
+                <Flex justify="center" align="center" style={{ width: '100%' }} >
+                    <Pagination
+                        total={total}
+                        showTotal={total => `共 ${total} 条`}
+                        pageSize={pageSize}
+                        current={currentPage}
+                        showSizeChanger
+                        pageSizeOptions={['10', '20', '50']}
+                        showQuickJumper
+                        onChange={(page, size) => {
+                            setCurrentPage(page);
+                            setPageSize(size);
+                        }}
+                        onShowSizeChange={(current, size) => {
+                            setCurrentPage(1);
+                            setPageSize(size);
+                        }}
+                    />
+                </Flex>
             </Flex>
             {/* 添加 */}
             {/* TODO:
@@ -262,6 +305,15 @@ export default function User() {
                             <Select.Option value="普通管理员">普通管理员</Select.Option>
                         </Select>
                     </Form.Item>
+
+                    <Form.Item label="验证码" name="inCaptcha"
+                        rules={[{ required: true, message: '请输入验证码' }]}>
+                        <Flex gap="small" align="center">
+                            <Input placeholder="请输入验证码" />
+                            <VCode setCaptcha={setCaptcha} fresh={fresh} />
+                        </Flex>
+                    </Form.Item>
+
                     <Flex justify="end" align="center" style={{ width: '100%' }} >
                         <SubmitButton form={form} loading={confirmLoading}>
                             添加用户
@@ -277,6 +329,7 @@ export default function User() {
                 onCancel={() => setEditDia(false)}
                 destroyOnHidden={true}
                 mask={{ blur: false }}
+                centered
             >
                 <Form
                     form={form}
@@ -344,6 +397,14 @@ export default function User() {
                         })]}
                     >
                         <Input.Password allowClear placeholder="请输入确认密码" />
+                    </Form.Item>
+
+                    <Form.Item label="验证码" name="inCaptcha"
+                        rules={[{ required: true, message: '请输入验证码' }]}>
+                        <Flex gap="small" align="center">
+                            <Input placeholder="请输入验证码" />
+                            <VCode setCaptcha={setCaptcha} fresh={fresh} />
+                        </Flex>
                     </Form.Item>
 
                     <Flex justify="end" align="center" style={{ width: '100%' }} >

@@ -17,6 +17,9 @@ importers:
       axios:
         specifier: ^1.13.2
         version: 1.13.2
+      dayjs:
+        specifier: ^1.11.19
+        version: 1.11.19
       js-md5:
         specifier: ^0.8.3
         version: 0.8.3
