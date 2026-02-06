@@ -84,6 +84,7 @@ const BeforeEach = ({ callback }) => {
                 });
                 localStorage.removeItem('admin');
                 navigate('/login', { replace: true });
+                setIsChecking(false);
             }
         };
 
