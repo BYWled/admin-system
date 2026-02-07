@@ -40,6 +40,11 @@ export default function LeftMenu(props) {
   // TODO: 不能直接在外面写延时生成，会导致重复执行。需使用副作用监听collapsed变化，控制标题显示隐藏
   useEffect(() => {
     props.collapsed ? setTitleText(false) : setTimeout(() => { setTitleText(true) }, 180);
+
+    return () => {
+      // 清除定时器，防止内存泄漏
+      clearTimeout();
+    }
   }, [props.collapsed]);
 
   // ******************函数部分******************

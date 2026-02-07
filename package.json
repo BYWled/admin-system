@@ -14,8 +14,10 @@
     "antd": "^6.1.4",
     "axios": "^1.13.2",
     "dayjs": "^1.11.19",
+    "echarts": "^6.0.0",
     "js-md5": "^0.8.3",
     "react": "^19.2.0",
+    "react-countup": "^6.5.3",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.12.0"
   },

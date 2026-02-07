@@ -9,8 +9,8 @@ import Order from '../views/order/index.jsx'
 import Store from '../views/store/index.jsx'
 import GoodsStatistics from '../views/statistics/goods.jsx'
 import OrderStatistics from '../views/statistics/order.jsx'
-import Permission from '../views/role/permission.jsx'
-import Role from '../views/role/role.jsx'
+import Permission from '../views/character/permission.jsx'
+import Role from '../views/character/role.jsx'
 import { HomeOutlined, AppstoreOutlined, ShopOutlined, ContainerOutlined, BarChartOutlined, TeamOutlined, LockOutlined, LoadingOutlined } from '@ant-design/icons';
 import { verifyTokenApi } from '../api/loginApi.js';
 import { App, Spin } from 'antd'
@@ -214,10 +214,10 @@ export const staticRouter = [
         element: <BeforeEach callback={<Layout />} />,
         children: [
             {
-                index: true,
                 element: <GoodsStatistics />,
                 id: 61,
-                key: '/statistics',
+                path: 'goods',
+                key: '/statistics/goods',
                 label: '商品统计'
             },
             {
@@ -232,24 +232,24 @@ export const staticRouter = [
     // 角色管理
     {
         id: 7,
-        key: '/roles',
-        path: '/role',
+        key: '/characters',
+        path: '/character',
         label: '角色管理',
         icon: <LockOutlined />,
         element: <BeforeEach callback={<Layout />} />,
         children: [
             {
-                index: true,
                 element: <Role />,
                 id: 71,
-                key: '/role',
+                path: 'role',
+                key: '/character/role',
                 label: '角色列表'
             },
             {
                 path: 'permission',
                 element: <Permission />,
                 id: 72,
-                key: '/role/permission',
+                key: '/character/permission',
                 label: '权限列表'
             }
         ]
