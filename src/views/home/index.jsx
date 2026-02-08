@@ -2,6 +2,7 @@ import { App, Avatar, Button, Card, Empty, Flex, Spin, Statistic, Typography } f
 import { useState, useEffect } from "react";
 import { ArrowDownOutlined, ArrowUpOutlined, InfoCircleOutlined, ReloadOutlined } from "@ant-design/icons";
 import * as echarts from "echarts";
+import s from "../../styles/layout.module.scss";
 import logo from "../../assets/logo.svg";
 import { getStatsApi } from "../../api/echartsApi";
 import CountUp from 'react-countup';
@@ -71,16 +72,15 @@ export default function home() {
         });
         const echartsDom = echarts.init(document.querySelector('#echartsStats'));
         echartsDom.setOption({
-            title: { text: '用户统计' },
             xAxis: { data: res.data.date },
             yAxis: {},
             legend: {
                 type: 'scroll',
                 orient: 'horizontal',
                 right: 10,
-                bottom: 0,
+                top: 10,
                 data: chartLegendData,
-                selected: Object.assign({}, ...chartLegendSelected)
+                selected: chartLegendSelected
             },
             tooltip: {
                 trigger: 'axis'
@@ -111,6 +111,9 @@ export default function home() {
                 case '3':
                     setSalutation('晚上好，一天的工作结束了🌟');
                     break;
+                case '4':
+                    setSalutation('该睡觉啦，晚安😴');
+                    break;
             }
         }
 
@@ -123,88 +126,97 @@ export default function home() {
         <Spin spinning={loading} size="large">
             <Flex wrap gap="20px">
                 <Flex vertical gap="20px" style={{ width: 'calc(33% - 10px)' }}>
-                    <Card variant="borderless" title={salutation} style={{ width: '100%', height: 'calc(50vh + 20px)' }} >
+                    <Card classNames={{ root: s.cardRoot, header: s.cardHeader, title: s.cardTitle }} variant="borderless" title={salutation} style={{ width: '100%', height: 'calc(50vh + 20px)' }} >
                         <Flex justify="center" align="center" gap={"large"} wrap style={{ width: '100%', height: '100%' }} >
-                            <Typography.Title level={4} style={{ margin: '5px' }} >欢迎使用 React Admin System</Typography.Title>
+                            <Typography.Title className={s.cardTitle} level={4} style={{ margin: '5px' }} >欢迎使用 React Admin System</Typography.Title>
                             <div style={{ width: '100%', textAlign: 'center' }} >
                                 <Avatar size={80} src={logo} />
                             </div>
-                            <Typography.Text type="secondary" >当前版本 v1.0.0</Typography.Text>
-                            <Typography.Text type="secondary" >开发者：BYWled</Typography.Text>
-                            <Typography.Text italic>当前身份：{<Typography.Text mark>{roleName}</Typography.Text>}，如果身份有误，可能导致页面权限异常</Typography.Text>
+                            <Typography.Text className={s.cardGary} >当前版本 v1.0.0</Typography.Text>
+                            <Typography.Text className={s.cardGary} >开发者：BYWled</Typography.Text>
+                            <Typography.Text className={s.cardTitle} italic>当前身份：{<Typography.Text className={s.cardTitle} mark>{roleName}</Typography.Text>}，如果身份有误，可能导致页面权限异常</Typography.Text>
                             <Button type="primary" href="https://www.wled.top" target="_blank" rel="noopener noreferrer" >访问开发者主页</Button>
                         </Flex>
                     </Card>
-                    <Card variant="borderless" style={{ width: '100%', height: '25vh' }} title="总销售数据" >
-                        <Flex justify="space-around" align="center">
+                    <Card classNames={{ root: s.cardRoot, header: s.cardHeader, title: s.cardTitle }} variant="borderless" style={{ width: '100%', height: '25vh' }} title="总销售数据" >
+                        <Flex justify="space-evenly" align="center">
                             <Flex wrap align="center">
-                                <Typography.Text type="secondary" style={{ width: '100%' }} >总订单数</Typography.Text>
+                                <Typography.Text className={s.cardGary} style={{ width: '100%' }} >总订单数</Typography.Text>
                                 <Statistic
                                     precision={0}
                                     formatter={() => <CountUp end={allOrders} separator="," />}
-                                    styles={{ content: { fontSize: '32px', fontWeight: 'bold' } }}
+                                    styles={{ content: { fontSize: '32px', fontWeight: 'bold', color: 'var(--textColor)' } }}
                                 />
                             </Flex>
                             <Flex wrap align="center">
-                                <Typography.Text type="secondary" style={{ width: '100%' }} >总销售额</Typography.Text>
+                                <Typography.Text className={s.cardGary} style={{ width: '100%' }} >总销售额</Typography.Text>
                                 <Statistic
                                     precision={2}
                                     prefix="¥"
                                     formatter={() => <CountUp end={allSales} separator="," />}
-                                    styles={{ content: { fontSize: '32px', fontWeight: 'bold' } }}
+                                    styles={{ content: { fontSize: '32px', fontWeight: 'bold', color: 'var(--textColor)' } }}
                                 />
                             </Flex>
                         </Flex>
                     </Card>
                 </Flex>
                 <Flex gap="20px" wrap style={{ width: 'calc(67% - 10px)' }}>
-                    <Card variant="borderless" title="用户数据" style={{ width: 'calc(50% - 10px)', height: '25vh' }} >
-                        <Flex justify="space-around" align="center">
-                            <Statistic
-                                title="最大涨幅"
-                                value={userMaxUp}
-                                precision={2}
-                                styles={{ content: { color: '#cf1322' } }}
-                                prefix={<ArrowUpOutlined />}
-                                suffix="%"
-                            />
-                            <Statistic
-                                title="最大降幅"
-                                value={userMaxDown}
-                                precision={2}
-                                styles={{ content: { color: '#3f8600' } }}
-                                prefix={<ArrowDownOutlined />}
-                                suffix="%"
-                            />
+                    <Card classNames={{ root: s.cardRoot, header: s.cardHeader, title: s.cardTitle }} variant="borderless" title="用户数据" style={{ width: 'calc(50% - 10px)', height: '25vh' }} >
+                        <Flex justify="space-evenly" align="center">
+                            <Flex wrap align="center">
+                                <Typography.Text className={s.cardGary} style={{ width: '100%' }} >最大涨幅</Typography.Text>
+                                <Statistic
+                                    value={userMaxUp}
+                                    precision={2}
+                                    styles={{ content: { color: '#cf1322' } }}
+                                    prefix={<ArrowUpOutlined />}
+                                    suffix="%"
+                                />
+                            </Flex>
+                            <Flex wrap align="center">
+                                <Typography.Text className={s.cardGary} style={{ width: '100%' }} >最大降幅</Typography.Text>
+                                <Statistic
+                                    value={userMaxDown}
+                                    precision={2}
+                                    styles={{ content: { color: '#3f8600' } }}
+                                    prefix={<ArrowDownOutlined />}
+                                    suffix="%"
+                                />
+                            </Flex>
                         </Flex>
                     </Card>
-                    <Card variant="borderless" title="订单数据" style={{ width: 'calc(50% - 10px)', height: '25vh' }} >
-                        <Flex justify="space-around" align="center">
-                            <Statistic
-                                title="最大涨幅"
-                                value={orderMaxUp}
-                                precision={2}
-                                styles={{ content: { color: '#cf1322' } }}
-                                prefix={<ArrowUpOutlined />}
-                                suffix="%"
-                            />
-                            <Statistic
-                                title="最大降幅"
-                                value={orderMaxDown}
-                                precision={2}
-                                styles={{ content: { color: '#3f8600' } }}
-                                prefix={<ArrowDownOutlined />}
-                                suffix="%"
-                            />
+                    <Card classNames={{ root: s.cardRoot, header: s.cardHeader, title: s.cardTitle }} variant="borderless" title="订单数据" style={{ width: 'calc(50% - 10px)', height: '25vh' }} >
+                        <Flex justify="space-evenly" align="center">
+                            <Flex wrap align="center">
+                                <Typography.Text className={s.cardGary} style={{ width: '100%' }} >最大涨幅</Typography.Text>
+                                <Statistic
+                                    value={orderMaxUp}
+                                    precision={2}
+                                    styles={{ content: { color: '#cf1322' } }}
+                                    prefix={<ArrowUpOutlined />}
+                                    suffix="%"
+                                />
+                            </Flex>
+                            <Flex wrap align="center">
+                                <Typography.Text className={s.cardGary} style={{ width: '100%' }} >最大降幅</Typography.Text>
+                                <Statistic
+                                    value={orderMaxDown}
+                                    precision={2}
+                                    styles={{ content: { color: '#3f8600' } }}
+                                    prefix={<ArrowDownOutlined />}
+                                    suffix="%"
+                                />
+                            </Flex>
                         </Flex>
+
                     </Card>
-                    <Card variant="borderless" title="用户统计" style={{ width: '100%', height: 'calc(50vh + 20px)' }} >
+                    <Card classNames={{ root: s.cardRoot, header: s.cardHeader, title: s.cardTitle }} variant="borderless" title="用户统计" style={{ width: '100%', height: 'calc(50vh + 20px)' }} >
                         {emptyCharts ? (
                             <Flex justify="center" align="center" style={{ width: '100%', height: 'calc(50vh - 28px)' }} >
                                 <Empty
                                     description={
                                         <>
-                                            <Typography.Text strong ><InfoCircleOutlined /> 暂无用户统计数据</Typography.Text><br />
+                                            <Typography.Text className={s.cardTitle} strong ><InfoCircleOutlined /> 暂无用户统计数据</Typography.Text><br />
                                             <Button type="primary" variant="filled" style={{ marginTop: 24 }} onClick={getTableData} icon={<ReloadOutlined />} >重试</Button>
                                         </>
                                     }

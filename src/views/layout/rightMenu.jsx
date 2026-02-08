@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { userInfoApi, checkPassApi, changePassApi } from '../../api/userApi'
 import VCode from '../../utils/verifyCode'
 import { LockOutlined, SunFilled, MoonFilled, BorderTopOutlined, BorderLeftOutlined, CheckOutlined, LogoutOutlined, EditOutlined, FullscreenOutlined } from '@ant-design/icons'
-import { App, Drawer, Flex, Modal, Input, Avatar, Card, Typography, Form, Button } from 'antd'
+import { App, Drawer, Flex, Modal, Input, Avatar, Card, Typography, Form, Button, Switch } from 'antd'
 import s from '../../styles/layout.module.scss'
 
 export default function RightMenu(props) {
@@ -139,18 +139,20 @@ export default function RightMenu(props) {
 
                 {/* 个人信息 */}
                 <Card
+                    classNames={{ root: s.cardRoot, header: s.cardHeader, title: s.cardTitle }}
                     style={{ width: '100%' }}
                     type="inner"
                     title="个人信息"
                 >
                     <Avatar style={{ marginBottom: '8px' }} shape="square" size={64} src={<img draggable={false} src={"https://www.wled.top/images/Oz-Vessalius-avatar.svg"} />} />
-                    <div><Text strong>用户Id：</Text>{userInfo.id || id}</div>
-                    {userInfo.account && <div><Text strong>用户名：</Text> {userInfo.account}</div>}
-                    <div><Text strong>用户角色：</Text> {userInfo.userGroup || role}</div>
+                    <div className={s.cardTitle}><Text className={s.cardTitle} strong>用户Id：</Text>{userInfo.id || id}</div>
+                    {userInfo.account && <div className={s.cardTitle}><Text className={s.cardTitle} strong>用户名：</Text> {userInfo.account}</div>}
+                    <div className={s.cardTitle}><Text className={s.cardTitle} strong>用户角色：</Text> {userInfo.userGroup || role}</div>
                 </Card>
 
                 {/* 主题设置 */}
                 <Card
+                    classNames={{ root: s.cardRoot, header: s.cardHeader, title: s.cardTitle }}
                     style={{ width: '100%' }}
                     type="inner"
                     title="主题设置"
@@ -166,13 +168,13 @@ export default function RightMenu(props) {
                             align="center"
                             gap="8px"
                             onClick={() => props.darkMode && props.tDarkMode()}
-                            className={s.menuThemeBox}
+                            className={`${s.menuThemeBox} ${s.cardTitle}`}
                             style={{
                                 border: !props.darkMode ? '2px solid #1677ff' : '2px solid #d9d9d9'
                             }}
                         >
                             <SunFilled style={{ fontSize: '24px', color: !props.darkMode ? '#1677ff' : 'inherit' }} />
-                            <Text>亮色主题</Text>
+                            <Text className={s.cardTitle}>亮色主题</Text>
                             {!props.darkMode && <CheckOutlined className={s.menuCheckout} />}
                         </Flex>
                         <Flex
@@ -180,13 +182,13 @@ export default function RightMenu(props) {
                             align="center"
                             gap="8px"
                             onClick={() => !props.darkMode && props.tDarkMode()}
-                            className={s.menuThemeBox}
+                            className={`${s.menuThemeBox} ${s.cardTitle}`}
                             style={{
                                 border: props.darkMode ? '2px solid #1677ff' : '2px solid #d9d9d9'
                             }}
                         >
                             <MoonFilled style={{ fontSize: '24px', color: props.darkMode ? '#1677ff' : 'inherit' }} />
-                            <Text>暗色主题</Text>
+                            <Text className={s.cardTitle}>暗色主题</Text>
                             {props.darkMode && <CheckOutlined className={s.menuCheckout} />}
                         </Flex>
                         <Flex
@@ -194,13 +196,13 @@ export default function RightMenu(props) {
                             align="center"
                             gap="8px"
                             onClick={() => props.topMenuMode && props.tTopMenuMode()}
-                            className={s.menuThemeBox}
+                            className={`${s.menuThemeBox} ${s.cardTitle}`}
                             style={{
                                 border: !props.topMenuMode ? '2px solid #1677ff' : '2px solid #d9d9d9'
                             }}
                         >
                             <BorderLeftOutlined style={{ fontSize: '24px', color: !props.topMenuMode ? '#1677ff' : 'inherit' }} />
-                            <Text>左侧菜单</Text>
+                            <Text className={s.cardTitle}>左侧菜单</Text>
                             {!props.topMenuMode && <CheckOutlined className={s.menuCheckout} />}
                         </Flex>
                         <Flex
@@ -208,76 +210,101 @@ export default function RightMenu(props) {
                             align="center"
                             gap="8px"
                             onClick={() => !props.topMenuMode && props.tTopMenuMode()}
-                            className={s.menuThemeBox}
+                            className={`${s.menuThemeBox} ${s.cardTitle}`}
                             style={{
                                 border: props.topMenuMode ? '2px solid #1677ff' : '2px solid #d9d9d9'
                             }}
                         >
                             <BorderTopOutlined style={{ fontSize: '24px', color: props.topMenuMode ? '#1677ff' : 'inherit' }} />
-                            <Text>顶部菜单</Text>
+                            <Text className={s.cardTitle}>顶部菜单</Text>
                             {props.topMenuMode && <CheckOutlined className={s.menuCheckout} />}
                         </Flex>
                     </Flex>
                 </Card>
+                <Flex justify="space-between" align="center">
+                    <Text className={s.cardTitle}>显示页脚：</Text>
+                    <Switch disabled={props.fullscreen} checked={props.footerMode} onChange={props.tFooterMode} />
+                </Flex>
             </Flex>
 
             {/* 按钮区域 */}
             <Flex vertical={true} justify="space-between" gap='small' style={{ width: '100%' }}>
-                <Button color="primary" variant="outlined" icon={<LockOutlined />} onClick={() => setLockDialogVisible(true)}>锁定屏幕</Button>
-                <Modal
-                    open={lockDialogVisible}
-                    title="锁屏"
-                    onOk={confirmLock}
-                    okText="确认并锁屏"
-                    closable={false}
-                    onCancel={() => setLockDialogVisible(false)}
-                    cancelText="取消"
-                >
-                    <Input.Password value={lockPassword} onChange={e => setLockPassword(e.target.value)} placeholder="请输入锁屏密码" />
-                </Modal>
-                <Button color="gold" variant="outlined" icon={<EditOutlined />} onClick={() => setPasswordDialogVisible(true)}>修改密码</Button>
-                <Modal
-                    open={passwordDialogVisible}
-                    title="修改密码"
-                    onOk={confirmPassword}
-                    okText="确认修改"
-                    closable={false}
-                    onCancel={() => setPasswordDialogVisible(false)}
-                    cancelText="取消"
-                >
-                    <Form
-                        name='changePassword'
-                        layout="horizontal"
-                        requiredMark={false}
-                        labelAlign="right"
-                        labelCol={{ span: 5 }}
-                        style={{ padding: '16px 16px 0 0' }}
-                    >
-                        <Form.Item validateTrigger="onBlurCapture" rules={[{ required: true, message: '请输入旧密码' }]} label="旧密码" name="oldPassword">
-                            <Input.Password value={oldPassword} onChange={e => setOldPassword(e.target.value)} placeholder="请输入旧密码" />
-                        </Form.Item>
-                        <Form.Item validateTrigger="onBlurCapture" rules={[{ required: true, message: '请输入新密码' }]} label="新密码" name="password">
-                            <Input.Password value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="请输入新密码" />
-                        </Form.Item>
-                        <Form.Item validateTrigger="onBlurCapture" dependencies={['password']}
-                            rules={[{ required: true, message: '请确认新密码' }, ({ getFieldValue }) => ({
-                                validator(_, value) {
-                                    if (!value || getFieldValue('password') === value) return Promise.resolve();
-                                    return Promise.reject(new Error('请确保两次输入的新密码一致'));
-                                },
-                            }),]} label="确认新密码" name="confirmPassword">
-                            <Input.Password value={confirmNewPassword} onChange={e => setConfirmNewPassword(e.target.value)} placeholder="请确认新密码" />
-                        </Form.Item>
-                        <Form.Item validateTrigger="onBlurCapture" rules={[{ required: true, message: '请输入验证码' }]} label="验证码" name="vCode">
-                            <Flex gap="small" align="center">
-                                <Input value={inCaptcha} onChange={e => setInCaptcha(e.target.value)} placeholder="请输入验证码" />
-                                <VCode setCaptcha={setCaptcha} fresh={fresh} />
-                            </Flex>
-                        </Form.Item>
-                    </Form>
-                </Modal>
-                <Button danger icon={<LogoutOutlined />} onClick={props.logout}>退出登录</Button>
+                <Button className={s.cardRoot} color="primary" variant="outlined" icon={<LockOutlined />} onClick={() => setLockDialogVisible(true)}>锁定屏幕</Button>
+                <Button className={s.cardRoot} color="gold" variant="outlined" icon={<EditOutlined />} onClick={() => setPasswordDialogVisible(true)}>修改密码</Button>
+                <Button className={s.cardRoot} danger icon={<LogoutOutlined />} onClick={props.logout}>退出登录</Button>
             </Flex>
+
+            {/* 对话框 */}
+            <Modal
+                classNames={{
+                    container: s.modalContainer,
+                    header: s.modalHeader,
+                    title: s.modalTitle,
+                    body: s.modalBody,
+                    footer: s.modalFooter
+                }}
+                open={lockDialogVisible}
+                title="锁屏"
+                onOk={confirmLock}
+                okText="确认并锁屏"
+                closable={false}
+                onCancel={() => setLockDialogVisible(false)}
+                cancelText="取消"
+
+            >
+                <Input.Password className={s.input} value={lockPassword} onChange={e => setLockPassword(e.target.value)} placeholder="请输入锁屏密码" />
+            </Modal>
+
+            <Modal
+                classNames={{
+                    container: s.modalContainer,
+                    header: s.modalHeader,
+                    title: s.modalTitle,
+                    body: s.modalBody,
+                    footer: s.modalFooter
+                }}
+                open={passwordDialogVisible}
+                title="修改密码"
+                onOk={confirmPassword}
+                okText="确认修改"
+                closable={false}
+                onCancel={() => setPasswordDialogVisible(false)}
+                cancelText="取消"
+            >
+                <Form
+                    name='changePassword'
+                    layout="horizontal"
+                    requiredMark={false}
+                    labelAlign="right"
+                    labelCol={{ span: 5 }}
+                    style={{ padding: '16px 16px 0 0' }}
+                    classNames={{
+                        label: s.formLabel
+                    }}
+                >
+                    <Form.Item validateTrigger="onBlurCapture" rules={[{ required: true, message: '请输入旧密码' }]} label="旧密码" name="oldPassword">
+                        <Input.Password className={s.input} value={oldPassword} onChange={e => setOldPassword(e.target.value)} placeholder="请输入旧密码" />
+                    </Form.Item>
+                    <Form.Item validateTrigger="onBlurCapture" rules={[{ required: true, message: '请输入新密码' }]} label="新密码" name="password">
+                        <Input.Password className={s.input} value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="请输入新密码" />
+                    </Form.Item>
+                    <Form.Item validateTrigger="onBlurCapture" dependencies={['password']}
+                        rules={[{ required: true, message: '请确认新密码' }, ({ getFieldValue }) => ({
+                            validator(_, value) {
+                                if (!value || getFieldValue('password') === value) return Promise.resolve();
+                                return Promise.reject(new Error('请确保两次输入的新密码一致'));
+                            },
+                        }),]} label="确认新密码" name="confirmPassword">
+                        <Input.Password className={s.input} value={confirmNewPassword} onChange={e => setConfirmNewPassword(e.target.value)} placeholder="请确认新密码" />
+                    </Form.Item>
+                    <Form.Item validateTrigger="onBlurCapture" rules={[{ required: true, message: '请输入验证码' }]} label="验证码" name="vCode">
+                        <Flex gap="small" align="center">
+                            <Input className={s.input} value={inCaptcha} onChange={e => setInCaptcha(e.target.value)} placeholder="请输入验证码" />
+                            <VCode setCaptcha={setCaptcha} fresh={fresh} />
+                        </Flex>
+                    </Form.Item>
+                </Form>
+            </Modal>
         </Flex >
     </Drawer >
 

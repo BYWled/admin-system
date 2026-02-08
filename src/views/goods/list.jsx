@@ -3,6 +3,7 @@ import { App, Form, Flex, Card, Button, Input, Popconfirm, Table, Typography, Mo
 import { getGoodsApi, addGoodsApi, editGoodsApi, deleteGoodsApi, getCategoryApi } from '../../api/goodsApi';
 import { timeToDate, numToTime } from '../../utils/time';
 import { FilterOutlined } from '@ant-design/icons';
+import s from '../../styles/layout.module.scss'
 
 export default function goods() {
     const { message } = App.useApp();
@@ -138,9 +139,16 @@ export default function goods() {
                             },
                         ]}
                     >
-                        {dataIndex === 'price' ? <InputNumber step="0.01" precision={2} /> :
+                        {dataIndex === 'price' ? <InputNumber className={s.input} step="0.01" precision={2} /> :
                             dataIndex === 'imgUrl' ? <>{/* TODO:上传图片预留 */}</> :
-                                dataIndex === 'category' ? <Select placeholder="请选择分类" options={categoriesData} /> : <Input />}
+                                dataIndex === 'category' ? <Select className={s.selectRoot}
+                                    classNames={{
+                                        popup: {
+                                            root: s.selectPopup,
+                                            listItem: s.selectListItem
+                                        }
+                                    }}
+                                    placeholder="请选择分类" options={categoriesData} /> : <Input className={s.input} />}
                     </Form.Item>
                 ) : (
                     children
@@ -253,7 +261,8 @@ export default function goods() {
                         <Button type='link' onClick={() => save(record.key)} style={{ marginInlineEnd: 8 }}>
                             保存
                         </Button>
-                        <Popconfirm title="确定取消吗?" onConfirm={cancel} okText="确定" cancelText="取消">
+                        <Popconfirm title="确定取消吗?" onConfirm={cancel} okText="确定" cancelText="取消"
+                            classNames={{ container: s.popconfirmRoot, title: s.popconfirmTitle, content: s.popconfirmContent }}>
                             <a>取消</a>
                         </Popconfirm>
                     </span>
@@ -273,6 +282,7 @@ export default function goods() {
                             okText="确认"
                             okType="danger"
                             cancelText="取消"
+                            classNames={{ container: s.popconfirmRoot, title: s.popconfirmTitle, content: s.popconfirmContent }}
                         >
                             <Button color="danger" variant="solid" disabled={editingKey !== ''} >删除</Button>
                         </Popconfirm>
@@ -298,16 +308,16 @@ export default function goods() {
         };
     });
 
-    return <Card variant="borderless" style={{ width: '100%' }
-    } >
+    return <Card classNames={{ root: s.cardRoot, header: s.cardHeader, title: s.cardTitle }} variant="borderless" style={{ width: '100%' }}>
         <Flex vertical justify="center" align="center" style={{ width: '100%' }} gap="small" >
             <Flex justify="end" align="center" style={{ width: '100%' }} gap="small" >
-                <Button color="cyan" variant="outlined" disabled={editingKey !== ''} onClick={() => setAddDia(true)}>
+                <Button className={s.cardRoot} color="cyan" variant="outlined" disabled={editingKey !== ''} onClick={() => setAddDia(true)}>
                     添加商品
                 </Button>
             </Flex>
             <Form form={form} component={false}>
                 <Table
+                    classNames={{ root: s.tableRoot, header: { cell: s.tableHeader }, body: { cell: s.tableBody } }}
                     components={{
                         body: { cell: EditableCell },
                     }}
@@ -336,6 +346,10 @@ export default function goods() {
                         setCurrentPage(1);
                         setPageSize(size);
                     }}
+                    classNames={{
+                        item: s.paginationItem
+                    }}
+                    className={s.pagination}
                 />
             </Flex>
         </Flex>
@@ -347,6 +361,13 @@ export default function goods() {
             onCancel={() => setAddDia(false)}
             destroyOnHidden={true}
             mask={{ blur: false }}
+            classNames={{
+                container: s.modalContainer,
+                header: s.modalHeader,
+                title: s.modalTitle,
+                body: s.modalBody,
+                footer: s.modalFooter
+            }}
         >
             <Form
                 form={form}
@@ -356,13 +377,16 @@ export default function goods() {
                 autoComplete="off"
                 requiredMark={false}
                 style={{ padding: '10px', width: '100%' }}
+                classNames={{
+                    label: s.formLabel
+                }}
             >
                 <Form.Item
                     label="商品图片"
                     name="imgUrl"
                     prefix={<FilterOutlined />}
                 >
-                    <Input defaultValue={'当前未启用上传图片功能'} disabled placeholder="请输入商品图片" />
+                    <Input className={s.input} defaultValue={'当前未启用上传图片功能'} disabled placeholder="请输入商品图片" />
                 </Form.Item>
 
                 <Form.Item
@@ -371,7 +395,7 @@ export default function goods() {
                     rules={[{ required: true, message: '请输入商品名!' }]}
                     prefix={<FilterOutlined />}
                 >
-                    <Input allowClear placeholder="请输入商品名" />
+                    <Input className={s.input} allowClear placeholder="请输入商品名" />
                 </Form.Item>
 
                 <Form.Item
@@ -380,7 +404,12 @@ export default function goods() {
                     rules={[{ required: true, message: '请选择商品分类!' }]}
                     prefix={<FilterOutlined />}
                 >
-                    <Select placeholder="请选择分类" options={categoriesData} />
+                    <Select className={s.selectRoot} classNames={{
+                        popup: {
+                            root: s.selectPopup,
+                            listItem: s.selectListItem
+                        }
+                    }} placeholder="请选择分类" options={categoriesData} />
                 </Form.Item>
 
                 <Form.Item
@@ -389,11 +418,11 @@ export default function goods() {
                     rules={[{ required: true, message: '请输入商品描述!' }]}
                     prefix={<FilterOutlined />}
                 >
-                    <Input.TextArea rows={4} style={{ width: '100%' }} allowClear placeholder="请输入商品描述" />
+                    <Input.TextArea className={s.input} rows={4} style={{ width: '100%' }} allowClear placeholder="请输入商品描述" />
                 </Form.Item>
 
                 <Form.Item label="单价" name="price" rules={[{ required: true, message: '请输入单价!' }]}>
-                    <InputNumber prefix="￥" step="0.01" precision={2} style={{ width: '100%' }} />
+                    <InputNumber className={s.input} prefix="￥" step="0.01" precision={2} style={{ width: '100%' }} />
                 </Form.Item>
                 <Flex justify="end" align="center" style={{ width: '100%' }} >
                     <SubmitButton form={form} loading={confirmLoading}>
@@ -412,10 +441,17 @@ export default function goods() {
             width={650}
             centered
             mask={{ blur: false }}
+            classNames={{
+                container: s.modalContainer,
+                header: s.modalHeader,
+                title: s.modalTitle,
+                body: s.modalBody,
+                footer: s.modalFooter
+            }}
         >
             <Flex direction="column" wrap gap="medium" >
-                <Divider orientation="left">基本信息</Divider>
-                <Descriptions column={2} style={{ width: '100%' }} bordered items={[
+                <Divider classNames={{ root: s.dividerRoot, rail: s.divider, content: s.divider }} orientation="left">基本信息</Divider>
+                <Descriptions classNames={{ root: s.descRoot, label: s.descLabel, content: s.descContent }} column={2} style={{ width: '100%' }} bordered items={[
                     {
                         key: '0',
                         label: '商品图片',
@@ -437,8 +473,8 @@ export default function goods() {
                         children: rowInfo.ctime,
                     }
                 ]} />
-                <Divider orientation="left">详细信息</Divider>
-                <Descriptions column={2} style={{ width: '100%' }} bordered items={[
+                <Divider classNames={{ root: s.dividerRoot, rail: s.divider, content: s.divider }} orientation="left">详细信息</Divider>
+                <Descriptions classNames={{ root: s.descRoot, label: s.descLabel, content: s.descContent }} column={2} style={{ width: '100%' }} bordered items={[
                     {
                         key: '1',
                         label: '商品分类',
@@ -460,20 +496,20 @@ export default function goods() {
                         children: rowInfo.rating ? `${rowInfo.rating} %` : '暂无评分',
                     },
                 ]} />
-                <Divider orientation="left">评价信息</Divider>
+                <Divider classNames={{ root: s.dividerRoot, rail: s.divider, content: s.divider }} orientation="left">评价信息</Divider>
                 <Flex direction="column" wrap gap="small" style={{ maxHeight: 200, overflowY: 'auto' }} >
                     {rowInfo.ratings && rowInfo.ratings.length > 0 ? rowInfo.ratings.map((item, index) => (
                         <>
                             <Flex justify="between" align="center" gap="small" style={{ width: '100%' }} >
                                 <Avatar src={item.avatar} alt="avatar" size="large" draggable={false} />
                                 <Flex gap="large">
-                                    <Typography.Text strong>{item.username}</Typography.Text>
-                                    <Typography.Text style={{ flex: 1 }} type="secondary">{numToTime(item.rateTime)}</Typography.Text>
-                                    <Typography.Text strong>{item.rateType ? '好评：' : '差评：'}</Typography.Text>
+                                    <Typography.Text className={s.cardTitle} strong>{item.username}</Typography.Text>
+                                    <Typography.Text className={s.cardGary} style={{ flex: 1 }}>{numToTime(item.rateTime)}</Typography.Text>
+                                    <Typography.Text className={s.cardTitle} strong>{item.rateType ? '好评：' : '差评：'}</Typography.Text>
                                 </Flex>
-                                <Typography.Text style={{ overflow: 'hidden' }}>{item.text || '无评论内容'}</Typography.Text>
+                                <Typography.Text className={s.cardTitle} style={{ overflow: 'hidden' }}>{item.text || '无'}</Typography.Text>
                             </Flex >
-                            <Divider size="small" />
+                            <Divider classNames={{ root: s.dividerRoot, rail: s.divider, content: s.divider }} size="small" />
                         </>
                     )) : <span>暂无评价信息</span>}
                 </Flex>

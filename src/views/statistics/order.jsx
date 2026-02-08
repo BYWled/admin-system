@@ -3,6 +3,7 @@ import { InfoCircleOutlined, ReloadOutlined } from '@ant-design/icons';
 import * as echarts from 'echarts';
 import { useState, useEffect } from 'react'
 import { getOrderApi } from '../../api/echartsApi';
+import s from '../../styles/layout.module.scss'
 
 export default function order() {
     const { message } = App.useApp();
@@ -40,10 +41,9 @@ export default function order() {
                 type: 'scroll',
                 orient: 'horizontal',
                 right: 10,
-                top: 35,
-                bottom: 20,
+                bottom: 0,
                 data: chartLegendData,
-                selected: Object.assign({}, ...chartLegendSelected)
+                selected: chartLegendSelected
             },
             tooltip: {
                 trigger: 'axis'
@@ -57,13 +57,13 @@ export default function order() {
     }, []);
 
     return (
-        <Card variant="borderless" style={{ width: '100%', height: '75vh' }} >
+        <Card classNames={{ root: s.cardRoot, header: s.cardHeader, title: s.cardTitle }} variant="borderless" style={{ width: '100%', height: '75vh' }} >
             {emptyData ? (
                 <Flex justify="center" align="center" style={{ width: '100%', height: 'calc(75vh - 40px)' }} >
                     <Empty
                         description={
                             <>
-                                <Typography.Text strong ><InfoCircleOutlined /> 暂无订单统计数据</Typography.Text><br />
+                                <Typography.Text className={s.cardTitle} strong ><InfoCircleOutlined /> 暂无订单统计数据</Typography.Text><br />
                                 <Button type="primary" variant="filled" style={{ marginTop: 24 }} onClick={getTableData} icon={<ReloadOutlined />} >重试</Button>
                             </>
                         }

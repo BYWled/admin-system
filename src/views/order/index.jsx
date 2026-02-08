@@ -3,6 +3,7 @@ import { timeToDate } from '../../utils/time';
 import dayjs from 'dayjs'; // TODO:由于antd日期组件依赖dayjs处理日期，这里也引入dayjs以避免报错
 import { getOrderApi, editOrderApi } from '../../api/orderApi';
 import { App, Button, Card, Flex, Table, Modal, Form, Input, DatePicker, Pagination, Divider, Descriptions, InputNumber, Select } from 'antd'
+import s from '../../styles/layout.module.scss'
 
 export default function order() {
     const [pageSize, setPageSize] = useState(10);
@@ -168,21 +169,28 @@ export default function order() {
     }));
 
     return (
-        <Card variant="borderless" style={{ width: '100%' }} >
+        <Card classNames={{ root: s.cardRoot, header: s.cardHeader, title: s.cardTitle }} variant="borderless" style={{ width: '100%' }} >
             <Flex vertical justify="center" align="center" style={{ width: '100%' }} gap="small" >
-                <Form layout="inline" style={{ marginBottom: '10px' }} >
+                <Form layout="inline" style={{ marginBottom: '10px' }} classNames={{ label: s.formLabel }} >
                     <Flex gap="small" wrap >
                         <Form.Item label="订单号">
-                            <Input placeholder='请输入订单号' value={formData.orderNo} onChange={(e) => setFormData({ ...formData, orderNo: e.target.value })} />
+                            <Input className={s.input} placeholder='请输入订单号' value={formData.orderNo} onChange={(e) => setFormData({ ...formData, orderNo: e.target.value })} />
                         </Form.Item>
                         <Form.Item label="收货人">
-                            <Input placeholder='请输入姓名' value={formData.consignee} onChange={(e) => setFormData({ ...formData, consignee: e.target.value })} />
+                            <Input className={s.input} placeholder='请输入姓名' value={formData.consignee} onChange={(e) => setFormData({ ...formData, consignee: e.target.value })} />
                         </Form.Item>
                         <Form.Item label="手机号">
-                            <InputNumber style={{ width: '150px' }} placeholder='请输入手机号' value={formData.phone} onChange={(value) => setFormData({ ...formData, phone: value })} />
+                            <InputNumber className={s.input} style={{ width: '150px' }} placeholder='请输入手机号' value={formData.phone} onChange={(value) => setFormData({ ...formData, phone: value })} />
                         </Form.Item>
                         <Form.Item label="订单状态">
                             <Select
+                                className={s.selectRoot}
+                                classNames={{
+                                    popup: {
+                                        root: s.selectPopup,
+                                        listItem: s.selectListItem
+                                    }
+                                }}
                                 placeholder="请选择"
                                 value={formData.orderState}
                                 style={{ width: '150px' }}
@@ -192,6 +200,7 @@ export default function order() {
                         </Form.Item>
                         <Form.Item label="下单时间">
                             <DatePicker.RangePicker
+                                className={s.input}
                                 value={formData.date[0] && formData.date[1] ? [dayjs(formData.date[0]), dayjs(formData.date[1])] : []}
                                 showTime
                                 placeholder={['开始时间', '结束时间']}
@@ -206,7 +215,7 @@ export default function order() {
                         </Form.Item>
                     </Flex>
                 </Form>
-                <Table columns={columns} dataSource={dataSource} loading={pageLoading} scroll={{ y: 55 * 8, x: 'max-content' }} pagination={false} />
+                <Table classNames={{ root: s.tableRoot, header: { cell: s.tableHeader }, body: { cell: s.tableBody } }} columns={columns} dataSource={dataSource} loading={pageLoading} scroll={{ y: 55 * 8, x: 'max-content' }} pagination={false} />
                 <Flex justify="center" align="center" style={{ width: '100%' }} >
                     <Pagination
                         total={total}
@@ -224,6 +233,10 @@ export default function order() {
                             setCurrentPage(1);
                             setPageSize(size);
                         }}
+                        classNames={{
+                            item: s.paginationItem
+                        }}
+                        className={s.pagination}
                     />
                 </Flex>
             </Flex>
@@ -237,10 +250,17 @@ export default function order() {
                 width={600}
                 centered
                 mask={{ blur: false }}
+                classNames={{
+                    container: s.modalContainer,
+                    header: s.modalHeader,
+                    title: s.modalTitle,
+                    body: s.modalBody,
+                    footer: s.modalFooter
+                }}
             >
                 <Flex direction="column" wrap gap="medium" >
-                    <Divider orientation="left">基本信息</Divider>
-                    <Descriptions column={2} style={{ width: '100%' }} size='small' bordered items={[
+                    <Divider classNames={{ root: s.dividerRoot, rail: s.divider, content: s.divider }} orientation="left">基本信息</Divider>
+                    <Descriptions classNames={{ root: s.descRoot, label: s.descLabel, content: s.descContent }} column={2} style={{ width: '100%' }} size='small' bordered items={[
                         {
                             key: '1',
                             label: '订单ID',
@@ -272,8 +292,8 @@ export default function order() {
                             children: rowInfo.remarks,
                         }
                     ]} />
-                    <Divider orientation="left">运输信息</Divider>
-                    <Descriptions column={2} style={{ width: '100%' }} bordered items={[
+                    <Divider classNames={{ root: s.dividerRoot, rail: s.divider, content: s.divider }} orientation="left">运输信息</Divider>
+                    <Descriptions classNames={{ root: s.descRoot, label: s.descLabel, content: s.descContent }} column={2} style={{ width: '100%' }} bordered items={[
                         {
                             key: '1',
                             label: '收件人',
@@ -308,6 +328,13 @@ export default function order() {
                 destroyOnHidden={true}
                 mask={{ blur: false }}
                 centered
+                classNames={{
+                    container: s.modalContainer,
+                    header: s.modalHeader,
+                    title: s.modalTitle,
+                    body: s.modalBody,
+                    footer: s.modalFooter
+                }}
             >
                 <Form
                     form={form}
@@ -317,6 +344,9 @@ export default function order() {
                     autoComplete="off"
                     clearOnDestroy={true}
                     style={{ padding: '10px', width: '100%' }}
+                    classNames={{
+                        label: s.formLabel
+                    }}
                 >
                     <Flex justify="space-between" align="center" wrap style={{ width: '100%' }} >
                         <Form.Item
@@ -326,7 +356,7 @@ export default function order() {
                             style={{ width: '45%' }}
                             rules={[{ required: true, message: '请输入订单号!' }]}
                         >
-                            <Input allowClear placeholder="请输入订单号" />
+                            <Input className={s.input} allowClear placeholder="请输入订单号" />
                         </Form.Item>
 
                         <Form.Item
@@ -336,7 +366,7 @@ export default function order() {
                             style={{ width: '45%' }}
                             rules={[{ required: true, message: '请输入订单金额!' }]}
                         >
-                            <Input allowClear placeholder="请输入订单金额" />
+                            <Input className={s.input} allowClear placeholder="请输入订单金额" />
                         </Form.Item>
 
                         <Form.Item
@@ -346,7 +376,7 @@ export default function order() {
                             style={{ width: '45%' }}
                             rules={[{ required: true, message: '请输入收货人!' }]}
                         >
-                            <Input allowClear placeholder="请输入收货人" />
+                            <Input className={s.input} allowClear placeholder="请输入收货人" />
                         </Form.Item>
 
                         <Form.Item
@@ -356,7 +386,7 @@ export default function order() {
                             style={{ width: '45%' }}
                             rules={[{ required: true, message: '请输入收货手机号!' }]}
                         >
-                            <Input allowClear placeholder="请输入手机号" />
+                            <Input className={s.input} allowClear placeholder="请输入手机号" />
                         </Form.Item>
 
                         <Form.Item
@@ -366,7 +396,7 @@ export default function order() {
                             style={{ width: '100%' }}
                             rules={[{ required: true, message: '请输入收货地址!' }]}
                         >
-                            <Input allowClear placeholder="请输入收货地址" />
+                            <Input className={s.input} allowClear placeholder="请输入收货地址" />
                         </Form.Item>
 
                         <Form.Item
@@ -377,6 +407,13 @@ export default function order() {
                             rules={[{ required: true, message: '请选择订单状态!' }]}
                         >
                             <Select
+                                className={s.selectRoot}
+                                classNames={{
+                                    popup: {
+                                        root: s.selectPopup,
+                                        listItem: s.selectListItem
+                                    }
+                                }}
                                 placeholder="请选择订单状态"
                                 options={stateOptions}
                             />
@@ -389,7 +426,7 @@ export default function order() {
                             style={{ width: '45%' }}
                             rules={[{ required: true, message: '请输入备注!' }]}
                         >
-                            <Input allowClear placeholder="请输入备注" />
+                            <Input className={s.input} allowClear placeholder="请输入备注" />
                         </Form.Item>
 
                         <Form.Item
@@ -399,7 +436,7 @@ export default function order() {
                             style={{ width: '45%' }}
                             rules={[{ required: true, message: '请输入下单时间!' }]}
                         >
-                            <DatePicker showTime placeholder="请输入时间" format={{
+                            <DatePicker className={s.input} showTime placeholder="请输入时间" format={{
                                 format: 'YYYY-MM-DD HH:mm:ss',
                                 type: 'mask',
                             }} />
@@ -412,7 +449,7 @@ export default function order() {
                             style={{ width: '45%' }}
                             rules={[{ required: true, message: '请输入收货时间!' }]}
                         >
-                            <DatePicker showTime placeholder="请输入时间" format={{
+                            <DatePicker className={s.input} showTime placeholder="请输入时间" format={{
                                 format: 'YYYY-MM-DD HH:mm:ss',
                                 type: 'mask',
                             }} />

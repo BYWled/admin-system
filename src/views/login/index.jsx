@@ -88,7 +88,7 @@ export default function Login() {
                             <Text italic={true} style={{ fontSize: '10px', color: '#999' }}>请使用HTTP协议访问网页，HTTPS会发生报错</Text>
                         </Form.Item>
                     </Form>
-                    <Divider style={{ margin: '20px 0' }}>more</Divider>
+                    <Divider classNames={{ root: s.dividerRoot, rail: s.divider, content: s.divider }}style={{ margin: '20px 0' }}>more</Divider>
                 </ConfigProvider>
                 <Flex gap={20} justify="center">
                     <Avatar className='a' size={40} onClick={() => window.location.href = 'https://github.com/BYWled/admin-system'} src={<img draggable={false} src={GitHubLogo} alt="Github" />} />

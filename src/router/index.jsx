@@ -158,10 +158,10 @@ export const staticRouter = [
         element: <BeforeEach callback={<Layout />} />,
         children: [
             {
-                index: true,
                 element: <GoodsList />,
                 id: 31,
-                key: '/goods',
+                path: 'list',
+                key: '/goods/list',
                 label: '商品列表'
             },
             {

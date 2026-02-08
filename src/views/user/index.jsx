@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 import { changePassApi } from '../../api/userApi';
 import { getUserApi, addUserApi, deleteUserApi, batchDeleteUserApi, editUserApi } from '../../api/userListApi';
 import { timeToDate } from '../../utils/time';
-import { App, Avatar, Button, Card, Flex, Table, Modal, Form, Input, Select, Popconfirm, Pagination } from 'antd'
+import { App, Avatar, Button, Card, Flex, Table, Modal, Form, Input, Select, Popconfirm, Pagination, ConfigProvider } from 'antd'
 import { UserOutlined, LockOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import s from '../../styles/layout.module.scss'
 import VCode from '../../utils/verifyCode';
 
 export default function User() {
@@ -190,6 +191,7 @@ export default function User() {
                     okText="确认"
                     okType="danger"
                     cancelText="取消"
+                    classNames={{ container: s.popconfirmRoot, title: s.popconfirmTitle, content: s.popconfirmContent }}
                 >
                     <Button color="danger" variant="solid">删除</Button>
                 </Popconfirm>
@@ -203,10 +205,10 @@ export default function User() {
     };
 
     return (
-        <Card variant="borderless" style={{ width: '100%' }}>
+        <Card classNames={{ root: s.cardRoot, header: s.cardHeader, title: s.cardTitle }} variant="borderless" style={{ width: '100%' }}>
             <Flex vertical justify="center" align="center" style={{ width: '100%' }} gap="small" >
                 <Flex justify="end" align="center" style={{ width: '100%' }} gap="small" >
-                    <Button color="cyan" variant="outlined" onClick={() => setAddDia(true)}>
+                    <Button className={s.cardRoot} color="cyan" variant="outlined" onClick={() => setAddDia(true)}>
                         添加用户
                     </Button>
                     <Popconfirm
@@ -217,13 +219,16 @@ export default function User() {
                         okText="确认"
                         okType="danger"
                         cancelText="取消"
+                        classNames={{ container: s.popconfirmRoot, title: s.popconfirmTitle, content: s.popconfirmContent }}
                     >
-                        <Button color="danger" variant="outlined" disabled={selectedRowIds.length === 0}>
+                        <Button className={s.cardRoot} color="danger" variant="outlined" disabled={selectedRowIds.length === 0}>
                             批量删除
                         </Button>
                     </Popconfirm>
                 </Flex>
-                <Table rowSelection={rowSelection} columns={columns} dataSource={dataSource} loading={pageLoading} scroll={{ y: 55 * 8, x: 'max-content' }} pagination={false} />
+                <Table
+                    classNames={{ root: s.tableRoot, header: { cell: s.tableHeader }, body: { cell: s.tableBody } }}
+                    rowSelection={rowSelection} columns={columns} dataSource={dataSource} loading={pageLoading} scroll={{ y: 55 * 8, x: 'max-content' }} pagination={false} />
                 <Flex justify="center" align="center" style={{ width: '100%' }} >
                     <Pagination
                         total={total}
@@ -241,6 +246,10 @@ export default function User() {
                             setCurrentPage(1);
                             setPageSize(size);
                         }}
+                        classNames={{
+                            item: s.paginationItem
+                        }}
+                        className={s.pagination}
                     />
                 </Flex>
             </Flex>
@@ -256,6 +265,13 @@ export default function User() {
                 onCancel={() => setAddDia(false)}
                 destroyOnHidden={true}
                 mask={{ blur: false }}
+                classNames={{
+                    container: s.modalContainer,
+                    header: s.modalHeader,
+                    title: s.modalTitle,
+                    body: s.modalBody,
+                    footer: s.modalFooter
+                }}
             >
                 <Form
                     form={form}
@@ -264,6 +280,9 @@ export default function User() {
                     layout="vertical"
                     autoComplete="off"
                     style={{ padding: '10px', width: '100%' }}
+                    classNames={{
+                        label: s.formLabel
+                    }}
                 >
                     <Form.Item
                         label="用户名"
@@ -271,7 +290,7 @@ export default function User() {
                         rules={[{ required: true, message: '请输入用户名!' }]}
                         prefix={<UserOutlined />}
                     >
-                        <Input allowClear placeholder="请输入用户名" />
+                        <Input className={s.input} allowClear placeholder="请输入用户名" />
                     </Form.Item>
 
                     <Form.Item
@@ -280,7 +299,7 @@ export default function User() {
                         rules={[{ required: true, message: '请输入密码!' }]}
                         prefix={<LockOutlined />}
                     >
-                        <Input.Password allowClear placeholder="请输入密码" />
+                        <Input.Password className={s.input} allowClear placeholder="请输入密码" />
                     </Form.Item>
 
                     <Form.Item
@@ -296,11 +315,16 @@ export default function User() {
                             },
                         })]}
                     >
-                        <Input.Password allowClear placeholder="请输入确认密码" />
+                        <Input.Password className={s.input} allowClear placeholder="请输入确认密码" />
                     </Form.Item>
 
                     <Form.Item label="身份组" name="userGroup" rules={[{ required: true, message: '请选择身份组!' }]}>
-                        <Select placeholder="请选择身份组">
+                        <Select className={s.selectRoot} classNames={{
+                                        popup: {
+                                            root: s.selectPopup,
+                                            listItem: s.selectListItem
+                                        }
+                                    }} placeholder="请选择身份组">
                             <Select.Option value="超级管理员">超级管理员</Select.Option>
                             <Select.Option value="普通管理员">普通管理员</Select.Option>
                         </Select>
@@ -309,7 +333,7 @@ export default function User() {
                     <Form.Item label="验证码" name="inCaptcha"
                         rules={[{ required: true, message: '请输入验证码' }]}>
                         <Flex gap="small" align="center">
-                            <Input placeholder="请输入验证码" />
+                            <Input className={s.input} placeholder="请输入验证码" />
                             <VCode setCaptcha={setCaptcha} fresh={fresh} />
                         </Flex>
                     </Form.Item>
@@ -330,6 +354,13 @@ export default function User() {
                 destroyOnHidden={true}
                 mask={{ blur: false }}
                 centered
+                classNames={{
+                    container: s.modalContainer,
+                    header: s.modalHeader,
+                    title: s.modalTitle,
+                    body: s.modalBody,
+                    footer: s.modalFooter
+                }}
             >
                 <Form
                     form={form}
@@ -339,6 +370,9 @@ export default function User() {
                     autoComplete="off"
                     clearOnDestroy={true}
                     style={{ padding: '10px', width: '100%' }}
+                    classNames={{
+                        label: s.formLabel
+                    }}
                 >
                     <Form.Item
                         label="用户名"
@@ -347,11 +381,16 @@ export default function User() {
                         rules={[{ required: true, message: '请输入用户名!' }]}
                         prefix={<UserOutlined />}
                     >
-                        <Input allowClear placeholder="请输入用户名" />
+                        <Input className={s.input} allowClear placeholder="请输入用户名" />
                     </Form.Item>
 
                     <Form.Item label="身份组" name="userGroup" initialValue={editForm.userGroup} rules={[{ required: true, message: '请选择身份组!' }]}>
-                        <Select placeholder="请选择身份组">
+                        <Select className={s.selectRoot} classNames={{
+                                        popup: {
+                                            root: s.selectPopup,
+                                            listItem: s.selectListItem
+                                        }
+                                    }} placeholder="请选择身份组">
                             <Select.Option value="超级管理员">超级管理员</Select.Option>
                             <Select.Option value="普通管理员">普通管理员</Select.Option>
                         </Select>
@@ -362,7 +401,7 @@ export default function User() {
                         name="oldPwd"
                         prefix={<LockOutlined />}
                     >
-                        <Input.Password allowClear placeholder="请输入旧密码" />
+                        <Input.Password className={s.input} allowClear placeholder="请输入旧密码" />
                     </Form.Item>
 
                     <Form.Item
@@ -377,7 +416,7 @@ export default function User() {
                             }
                         })]}
                     >
-                        <Input.Password allowClear placeholder="请输入密码" />
+                        <Input.Password className={s.input} allowClear placeholder="请输入密码" />
                     </Form.Item>
 
                     <Form.Item
@@ -396,13 +435,13 @@ export default function User() {
                             },
                         })]}
                     >
-                        <Input.Password allowClear placeholder="请输入确认密码" />
+                        <Input.Password className={s.input} allowClear placeholder="请输入确认密码" />
                     </Form.Item>
 
                     <Form.Item label="验证码" name="inCaptcha"
                         rules={[{ required: true, message: '请输入验证码' }]}>
                         <Flex gap="small" align="center">
-                            <Input placeholder="请输入验证码" />
+                            <Input className={s.input} placeholder="请输入验证码" />
                             <VCode setCaptcha={setCaptcha} fresh={fresh} />
                         </Flex>
                     </Form.Item>

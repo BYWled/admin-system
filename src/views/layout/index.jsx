@@ -21,6 +21,7 @@ export default function layout() {
   const [darkMode, setDarkMode] = useState(false);
   const [topMenuMode, setTopMenuMode] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
+  const [footerMode, setFooterMode] = useState(true);
   const [time, setTime] = useState(Temporal.Now.zonedDateTimeISO());
   const timerRef = useRef(null); // TODO:使用 ref 存储定时器 ID，避免重复创建：使用useSate会在数据更新时再次渲染组件，导致定时器重复创建，从而导致内存溢出
   const navigate = useNavigate();
@@ -115,6 +116,11 @@ export default function layout() {
     setRightMenu(false);
   }
 
+  // 底部显示切换函数
+  const tFooterMode = () => {
+    setFooterMode(!footerMode);
+  }
+
   // 退出登录函数
   const logout = () => {
     localStorage.removeItem('admin');
@@ -170,28 +176,30 @@ export default function layout() {
               <Outlet />
               <FloatButton.BackTop />
             </Content>
-            <Footer className={s.layoutFooter}>
-              <Flex justify='center' align='center' style={{ width: '100%', height: '100%' }}>
-                {/* TODO:_blank 新增标签页打开 */}
-                <Button color={darkMode ? "geekblue" : "default"} styles={{
-                  root: {
-                    height: '100%',
-                    padding: 0,
-                  }
-                }}
-                  onClick={() => window.open('https://github.com/BYWled/admin-system', '_blank')}
-                  variant="link">admin-system Dev-01.30</Button>
-                <span>&nbsp;©2026 Created by&nbsp;</span>
-                <Button color={darkMode ? "geekblue" : "default"} styles={{
-                  root: {
-                    height: '100%',
-                    padding: 0,
-                  }
-                }}
-                  onClick={() => window.open('https://github.com/BYWled', '_blank')}
-                  variant="link">BYWled</Button>
-              </Flex>
-            </Footer>
+            {
+              footerMode && <Footer className={s.layoutFooter}>
+                <Flex justify='center' align='center' style={{ width: '100%', height: '100%' }}>
+                  {/* TODO:_blank 新增标签页打开 */}
+                  <Button color={darkMode ? "geekblue" : "default"} styles={{
+                    root: {
+                      height: '100%',
+                      padding: 0,
+                    }
+                  }}
+                    onClick={() => window.open('https://github.com/BYWled/admin-system', '_blank')}
+                    variant="link">admin-system Dev-01.30</Button>
+                  <span>&nbsp;©2026 Created by&nbsp;</span>
+                  <Button color={darkMode ? "geekblue" : "default"} styles={{
+                    root: {
+                      height: '100%',
+                      padding: 0,
+                    }
+                  }}
+                    onClick={() => window.open('https://github.com/BYWled', '_blank')}
+                    variant="link">BYWled</Button>
+                </Flex>
+              </Footer>
+            }
           </Layout>
         </Layout>
       }
@@ -211,7 +219,7 @@ export default function layout() {
         className={'a'}
       />}
       {/* 右菜单 */}
-      <RightMenu time={time} rightMenu={rightMenu} tRightMenu={tRightMenu} darkMode={darkMode} tDarkMode={tDarkMode} topMenuMode={topMenuMode} tTopMenuMode={tTopMenuMode} fullscreen={fullscreen} tFullscreen={tFullscreen} lockScreen={lockScreen} tLockScreen={(password) => onLockScreen(password)} logout={logout} />
+      <RightMenu time={time} rightMenu={rightMenu} tRightMenu={tRightMenu} darkMode={darkMode} tDarkMode={tDarkMode} topMenuMode={topMenuMode} tTopMenuMode={tTopMenuMode} fullscreen={fullscreen} tFullscreen={tFullscreen} footerMode={footerMode} tFooterMode={tFooterMode} lockScreen={lockScreen} tLockScreen={(password) => onLockScreen(password)} logout={logout} />
       {/* 锁屏部分 */}
       <Tour open={lockScreen} steps={lock} mask={false} keyboard={false} arrow={false} closeIcon={false} classNames={{ root: s.lockRoot, mask: s.lockMask, section: s.lockSection }} />
     </>

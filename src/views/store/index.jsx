@@ -3,6 +3,7 @@ import { timeToDate } from '../../utils/time';
 import dayjs from 'dayjs'; // TODO:由于antd日期组件依赖dayjs处理日期，这里也引入dayjs以避免报错
 import { getStoreApi } from '../../api/storeApi';
 import { App, Button, Card, Flex, Table, Modal, Form, Input, DatePicker, Pagination, Divider, Descriptions, Select, Typography, Avatar } from 'antd';
+import s from '../../styles/layout.module.scss'
 
 export default function store() {
     const [pageSize, setPageSize] = useState(10);
@@ -147,9 +148,9 @@ export default function store() {
     }));
 
     return (
-        <Card variant="borderless" style={{ width: '100%' }} >
+        <Card classNames={{ root: s.cardRoot, header: s.cardHeader, title: s.cardTitle }} variant="borderless" style={{ width: '100%' }} >
             <Flex vertical justify="center" align="center" style={{ width: '100%' }} gap="small" >
-                <Table columns={columns} dataSource={dataSource} loading={pageLoading} scroll={{ y: 55 * 8, x: 'max-content' }} pagination={false} />
+                <Table classNames={{ root: s.tableRoot, header: { cell: s.tableHeader }, body: { cell: s.tableBody } }} columns={columns} dataSource={dataSource} loading={pageLoading} scroll={{ y: 55 * 8, x: 'max-content' }} pagination={false} />
                 {/* 分页 */}
                 <Flex justify="center" align="center" style={{ width: '100%' }} >
                     <Pagination
@@ -168,6 +169,10 @@ export default function store() {
                             setCurrentPage(1);
                             setPageSize(size);
                         }}
+                        classNames={{
+                            item: s.paginationItem
+                        }}
+                        className={s.pagination}
                     />
                 </Flex>
             </Flex>
@@ -181,10 +186,17 @@ export default function store() {
                 width={600}
                 centered
                 mask={{ blur: false }}
+                classNames={{
+                    container: s.modalContainer,
+                    header: s.modalHeader,
+                    title: s.modalTitle,
+                    body: s.modalBody,
+                    footer: s.modalFooter
+                }}
             >
                 <Flex direction="column" wrap gap="medium" >
-                    <Divider orientation="left">基本信息</Divider>
-                    <Descriptions column={2} style={{ width: '100%' }} size='small' bstoreed items={[
+                    <Divider classNames={{ root: s.dividerRoot, rail: s.divider, content: s.divider }}orientation="left">基本信息</Divider>
+                    <Descriptions classNames={{ root: s.descRoot, label: s.descLabel, content: s.descContent }} column={2} style={{ width: '100%' }} size='small' bstoreed items={[
                         {
                             key: '1',
                             label: '店铺ID',
@@ -216,8 +228,8 @@ export default function store() {
                             children: rowInfo.remarks,
                         }
                     ]} />
-                    <Divider orientation="left">运输信息</Divider>
-                    <Descriptions column={2} style={{ width: '100%' }} bstoreed items={[
+                    <Divider classNames={{ root: s.dividerRoot, rail: s.divider, content: s.divider }}orientation="left">运输信息</Divider>
+                    <Descriptions classNames={{ root: s.descRoot, label: s.descLabel, content: s.descContent }} column={2} style={{ width: '100%' }} bstoreed items={[
                         {
                             key: '1',
                             label: '收件人',
@@ -252,6 +264,13 @@ export default function store() {
                 destroyOnHidden={true}
                 mask={{ blur: false }}
                 centered
+                classNames={{
+                    container: s.modalContainer,
+                    header: s.modalHeader,
+                    title: s.modalTitle,
+                    body: s.modalBody,
+                    footer: s.modalFooter
+                }}
             >
                 <Form
                     form={form}
@@ -261,6 +280,9 @@ export default function store() {
                     autoComplete="off"
                     clearOnDestroy={true}
                     style={{ padding: '10px', width: '100%' }}
+                    classNames={{
+                        label: s.formLabel
+                    }}
                 >
                     <Flex justify="space-between" align="center" wrap style={{ width: '100%' }} >
                         <Form.Item
@@ -270,7 +292,7 @@ export default function store() {
                             style={{ width: '45%' }}
                             rules={[{ required: true, message: '请输入店铺号!' }]}
                         >
-                            <Input allowClear placeholder="请输入店铺号" />
+                            <Input className={s.input} allowClear placeholder="请输入店铺号" />
                         </Form.Item>
 
                         <Form.Item
@@ -280,7 +302,7 @@ export default function store() {
                             style={{ width: '45%' }}
                             rules={[{ required: true, message: '请输入店铺金额!' }]}
                         >
-                            <Input allowClear placeholder="请输入店铺金额" />
+                            <Input className={s.input} allowClear placeholder="请输入店铺金额" />
                         </Form.Item>
 
                         <Form.Item
@@ -290,7 +312,7 @@ export default function store() {
                             style={{ width: '45%' }}
                             rules={[{ required: true, message: '请输入收货人!' }]}
                         >
-                            <Input allowClear placeholder="请输入收货人" />
+                            <Input className={s.input} allowClear placeholder="请输入收货人" />
                         </Form.Item>
 
                         <Form.Item
@@ -300,7 +322,7 @@ export default function store() {
                             style={{ width: '45%' }}
                             rules={[{ required: true, message: '请输入收货手机号!' }]}
                         >
-                            <Input allowClear placeholder="请输入手机号" />
+                            <Input className={s.input} allowClear placeholder="请输入手机号" />
                         </Form.Item>
 
                         <Form.Item
@@ -310,7 +332,7 @@ export default function store() {
                             style={{ width: '100%' }}
                             rules={[{ required: true, message: '请输入收货地址!' }]}
                         >
-                            <Input allowClear placeholder="请输入收货地址" />
+                            <Input className={s.input} allowClear placeholder="请输入收货地址" />
                         </Form.Item>
 
                         <Form.Item
@@ -321,6 +343,13 @@ export default function store() {
                             rules={[{ required: true, message: '请选择店铺状态!' }]}
                         >
                             <Select
+                                className={s.selectRoot}
+                                classNames={{
+                                        popup: {
+                                            root: s.selectPopup,
+                                            listItem: s.selectListItem
+                                        }
+                                    }}
                                 placeholder="请选择店铺状态"
                                 options={stateOptions}
                             />
@@ -333,7 +362,7 @@ export default function store() {
                             style={{ width: '45%' }}
                             rules={[{ required: true, message: '请输入备注!' }]}
                         >
-                            <Input allowClear placeholder="请输入备注" />
+                            <Input className={s.input} allowClear placeholder="请输入备注" />
                         </Form.Item>
 
                         <Form.Item

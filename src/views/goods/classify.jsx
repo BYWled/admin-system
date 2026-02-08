@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { App, Form, Flex, Card, Button, Input, Popconfirm, Table, Modal, Radio, Pagination } from 'antd';
 import { getClassifyApi, addClassifyApi, editClassifyApi, deleteClassifyApi } from '../../api/classifyApi';
 import { FilterOutlined } from '@ant-design/icons';
+import s from '../../styles/layout.module.scss'
 
 export default function classify() {
     const { message } = App.useApp();
@@ -93,7 +94,7 @@ export default function classify() {
         const inputNode = dataIndex === 'state' ? <Radio.Group options={[
             { label: '启用', value: '启用' },
             { label: '禁用', value: '禁用' },
-        ]} defaultValue="启用" optionType="button" /> : <Input />;
+        ]} defaultValue="启用" optionType="button" /> : <Input className={s.input} />;
         return (
             <td {...restProps}>
                 {editing ? (
@@ -198,7 +199,8 @@ export default function classify() {
                         <Button type='link' onClick={() => save(record.key)} style={{ marginInlineEnd: 8 }}>
                             保存
                         </Button>
-                        <Popconfirm title="确定取消吗?" onConfirm={cancel} okText="确定" cancelText="取消">
+                        <Popconfirm title="确定取消吗?" onConfirm={cancel} okText="确定" cancelText="取消"
+                            classNames={{ container: s.popconfirmRoot, title: s.popconfirmTitle, content: s.popconfirmContent }}>
                             <a>取消</a>
                         </Popconfirm>
                     </span>
@@ -215,6 +217,7 @@ export default function classify() {
                             okText="确认"
                             okType="danger"
                             cancelText="取消"
+                            classNames={{ container: s.popconfirmRoot, title: s.popconfirmTitle, content: s.popconfirmContent }}
                         >
                             <Button color="danger" variant="solid">删除</Button>
                         </Popconfirm>
@@ -240,15 +243,16 @@ export default function classify() {
         };
     });
 
-    return <Card variant="borderless" style={{ width: '100%' }}>
+    return <Card classNames={{ root: s.cardRoot, header: s.cardHeader, title: s.cardTitle }} variant="borderless" style={{ width: '100%' }}>
         <Flex vertical justify="center" align="center" style={{ width: '100%' }} gap="small" >
             <Flex justify="end" align="center" style={{ width: '100%' }} gap="small" >
-                <Button color="cyan" variant="outlined" disabled={editingKey !== ''} onClick={() => setAddDia(true)}>
+                <Button className={s.cardRoot} color="cyan" variant="outlined" disabled={editingKey !== ''} onClick={() => setAddDia(true)}>
                     添加分类
                 </Button>
             </Flex>
             <Form form={form} component={false}>
                 <Table
+                    classNames={{ root: s.tableRoot, header: { cell: s.tableHeader }, body: { cell: s.tableBody } }}
                     components={{
                         body: { cell: EditableCell },
                     }}
@@ -277,6 +281,10 @@ export default function classify() {
                         setCurrentPage(1);
                         setPageSize(size);
                     }}
+                    classNames={{
+                        item: s.paginationItem
+                    }}
+                    className={s.pagination}
                 />
             </Flex>
         </Flex>
@@ -288,6 +296,13 @@ export default function classify() {
             onCancel={() => setAddDia(false)}
             destroyOnHidden={true}
             mask={{ blur: false }}
+            classNames={{
+                container: s.modalContainer,
+                header: s.modalHeader,
+                title: s.modalTitle,
+                body: s.modalBody,
+                footer: s.modalFooter
+            }}
         >
             <Form
                 form={form}
@@ -297,6 +312,9 @@ export default function classify() {
                 autoComplete="off"
                 requiredMark={false}
                 style={{ padding: '10px', width: '100%' }}
+                classNames={{
+                    label: s.formLabel
+                }}
             >
                 <Form.Item
                     label="分类名"
@@ -304,7 +322,7 @@ export default function classify() {
                     rules={[{ required: true, message: '请输入分类名!' }]}
                     prefix={<FilterOutlined />}
                 >
-                    <Input allowClear placeholder="请输入分类名" />
+                    <Input allowClear placeholder="请输入分类名" className={s.input} />
                 </Form.Item>
 
                 <Form.Item label="启用状态" name="state">

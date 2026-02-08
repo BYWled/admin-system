@@ -50,6 +50,7 @@
 
 .rightMenuCardArea {
     flex: 1;
+    margin-bottom: 10px;
     overflow-y: auto;
     /* 隐藏 IE/Edge 滚动条 */
     -ms-overflow-style: none;
@@ -128,4 +129,115 @@
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+// ****************** 卡片内通用样式 ******************
+.cardRoot {
+    background-color: var(--backColor);
+}
+
+.cardHeader {
+    border-color: color-mix(in srgb, var(--backColor) 80%, #eee);
+}
+
+.cardTitle,
+.cardBody {
+    color: var(--textColor) !important;
+}
+
+.cardGary {
+    color: color-mix(in srgb, var(--textColor) 40%, #eee);
+}
+
+// ****************** 对话框通用样式 ******************
+.modalContainer {
+    background-color: var(--backColor) !important;
+}
+
+.modalTitle,
+.modalBody {
+    color: var(--textColor) !important;
+}
+
+// ****************** 表单通用样式 ******************
+.formLabel {
+    color: var(--textColor) !important;
+}
+
+.input {
+    background-color: color-mix(in srgb, var(--backColor) 60%, #eee) !important;
+    color: var(--textColor) !important;
+}
+
+// ****************** 表格通用样式 ******************
+.tableRoot {
+    background-color: var(--backColor) !important;
+}
+
+.tableHeader {
+    background-color: color-mix(in srgb, var(--backColor) 80%, #eee) !important;
+    color: var(--textColor) !important;
+}
+
+.tableBody {
+    background-color: var(--backColor) !important;
+    color: var(--textColor) !important;
+}
+
+.pagination {
+    color: var(--textColor) !important;
+}
+
+.paginationItem {
+    background-color: color-mix(in srgb, var(--backColor) 80%, #eee) !important;
+    color: var(--textColor) !important;
+}
+
+// ****************** 描述列表通用样式 ******************
+.descRoot {
+    background-color: var(--backColor) !important;
+}
+
+.descLabel {
+    background-color: color-mix(in srgb, var(--backColor) 80%, #eee) !important;
+    color: var(--textColor) !important;
+}
+
+.descContent {
+    background-color: var(--backColor) !important;
+    color: var(--textColor) !important;
+}
+
+.dividerRoot {
+    color: var(--textColor) !important;
+}
+
+.divider {
+    border-color: color-mix(in srgb, var(--backColor) 60%, #ccc) !important;
+    color: var(--textColor) !important;
+}
+
+// ****************** 选择器通用样式 ******************
+.selectRoot {
+    background-color: color-mix(in srgb, var(--backColor) 60%, #eee) !important;
+    color: var(--textColor) !important;
+}
+
+.selectPopup {
+    background-color: color-mix(in srgb, var(--backColor) 90%, #eee) !important;
+    color: var(--textColor) !important;
+}
+
+.selectListItem {
+    color: color-mix(in srgb, var(--textColor) 40%, #ccc) !important;
+}
+
+// ****************** 确认框通用样式 ******************
+.popconfirmRoot {
+    background-color: color-mix(in srgb, var(--backColor) 90%, #eee) !important;
+}
+
+.popconfirmTitle,
+.popconfirmContent {
+    color: var(--textColor) !important;
 }
