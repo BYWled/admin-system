@@ -18,7 +18,7 @@ export default function layout() {
   const [rightMenu, setRightMenu] = useState(false);
   const [lockScreen, setLockScreen] = useState(false);
   const [lockPassword, setLockPassword] = useState('');
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(Temporal.Now.plainDateTimeISO().hour >= 18 || Temporal.Now.plainDateTimeISO().hour < 6); // 晚上6点到早上6点默认暗黑模式
   const [topMenuMode, setTopMenuMode] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [footerMode, setFooterMode] = useState(true);

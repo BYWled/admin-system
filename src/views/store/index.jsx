@@ -1,22 +1,16 @@
 import { useEffect, useState } from 'react'
 import { timeToDate } from '../../utils/time';
 import dayjs from 'dayjs'; // TODO:由于antd日期组件依赖dayjs处理日期，这里也引入dayjs以避免报错
-import { getStoreApi } from '../../api/storeApi';
-import { App, Button, Card, Flex, Table, Modal, Form, Input, DatePicker, Pagination, Divider, Descriptions, Select, Typography, Avatar } from 'antd';
+import { getStoreApi, /*TODO:会把服务器改炸的editStoreApi*/ } from '../../api/storeApi';
+import { App, Button, Card, Flex, Table, Modal, Form, Input, DatePicker, Pagination, Divider, Descriptions, Select, Typography, Avatar, Carousel, InputNumber, Upload } from 'antd';
+const { RangePicker } = DatePicker;
+const { TextArea } = Input;
 import s from '../../styles/layout.module.scss'
 
 export default function store() {
     const [pageSize, setPageSize] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
     const [total, setTotal] = useState(0);
-
-    // 状态选项
-    const stateOptions = [
-        { label: '请选择', value: '' },
-        { label: '已受理', value: '已受理' },
-        { label: '派送中', value: '派送中' },
-        { label: '已完成', value: '已完成' }
-    ];
     const [tableData, setTableData] = useState([]);
     const [pageLoading, setPageLoading] = useState(false);
     const [confirmLoading, setConfirmLoading] = useState(false); // 通用确认加载状态，一般仅有一个弹窗
@@ -71,27 +65,56 @@ export default function store() {
     // ============ 编辑店铺 ==============
     const openEdit = (item) => {
         setEditDia(true);
+        // 处理日期范围
+        const dateRange = (item.date && item.date.length === 2)
+            ? [dayjs(timeToDate(item.date[0])), dayjs(timeToDate(item.date[1]))]
+            : null;
+
+        // 处理数组字段：将字符串数组转为文本
+        const supportsText = item.supports && item.supports.length > 0
+            ? item.supports.join('\n')
+            : '';
+
         setEditForm({
             ...item,
-            storeTime: dayjs(timeToDate(item.storeTime)),// TODO:antd日期组件依赖dayjs处理日期，这里转换一下
-            deliveryTime: dayjs(timeToDate(item.deliveryTime))
+            date: dateRange,
+            supports: supportsText,
+            pics: '' // 图片禁用，设为空
         })
     }
     const editStore = async (values) => {
         try {
             setConfirmLoading(true);
+
+            // 处理日期范围：转换为字符串数组的JSON格式
+            const dateArray = values.date && values.date.length === 2
+                ? '[' + [values.date[0].format('YYYY-MM-DD HH:mm:ss'), values.date[1].format('YYYY-MM-DD HH:mm:ss')].join(', ') + ']'
+                : '[]';
+
+            // 处理活动字段：将每行文本转为字符串数组的JSON格式
+            const supportsArray = values.supports
+                ? '[' + [values.supports.split('\n').filter(s => s.trim()).map(s => `${s.trim()}`)].join(', ') + ']'
+                : '[]';
+
+            // 处理图片字段：转为字符串数组的JSON格式（虽然禁用，但需要保持格式）
+            const picsArray = values.pics
+                ? `[${values.pics.split('\n').filter(s => s.trim()).map(s => `"${s.trim()}"`).join(',')}]`
+                : '[]';
+
             // 修改信息
             const res = await editStoreApi({
                 id: editForm.id,
-                storeNo: values.storeNo,
-                storeTime: values.storeTime,
-                phone: values.phone,
-                consignee: values.consignee,
-                deliverAddress: values.deliverAddress,
-                storeState: values.storeState,
-                storeAmount: values.storeAmount,
-                remarks: values.remarks,
-                deliveryTime: values.deliveryTime
+                name: values.name,
+                avatar: editForm.avatar,
+                bulletin: values.bulletin,
+                description: values.description,
+                date: dateArray,
+                deliveryTime: values.deliveryTime,
+                deliveryPrice: values.deliveryPrice,
+                score: values.score,
+                sellCount: values.sellCount,
+                supports: supportsArray,
+                pics: picsArray
             });
             if (res.code) {
                 setConfirmLoading(false);
@@ -112,7 +135,7 @@ export default function store() {
 
     // =========== 查看详情 ==============
     const info = (record) => {
-        setRowInfo({ ...record, storeTime: timeToDate(record.storeTime), deliveryTime: timeToDate(record.deliveryTime) });
+        setRowInfo({ ...record, date: (record.date && record.date.length === 2) ? `${timeToDate(record.date[0])} - ${timeToDate(record.date[1])}` : '-' });
         setInfoDia(true);
     }
 
@@ -137,8 +160,8 @@ export default function store() {
         avatar: <Avatar shape="square" src={item.avatar} alt="avatar" size="large" draggable={false} />,
         score: item.score,
         sellCount: item.sellCount,
-        date: 1,
-        description: <Typography.Paragraph ellipsis={{ tooltip: item.description, rows: 1 }} style={{ maxWidth: 200, margin: 0 }}>{item.description}</Typography.Paragraph>,
+        date: item.date,
+        description: <Typography.Paragraph className={s.cardTitle} ellipsis={{ tooltip: item.description, rows: 1 }} style={{ maxWidth: 200, margin: 0 }}>{item.description}</Typography.Paragraph>,
         action: (
             <Flex gap="small">
                 <Button variant="solid" onClick={() => info(item)}>详情</Button>
@@ -177,7 +200,7 @@ export default function store() {
                 </Flex>
             </Flex>
             {/* 详情 */}
-            <Modal
+            < Modal
                 title="店铺详情"
                 open={infoDia}
                 footer={null}
@@ -195,8 +218,8 @@ export default function store() {
                 }}
             >
                 <Flex direction="column" wrap gap="medium" >
-                    <Divider classNames={{ root: s.dividerRoot, rail: s.divider, content: s.divider }}orientation="left">基本信息</Divider>
-                    <Descriptions classNames={{ root: s.descRoot, label: s.descLabel, content: s.descContent }} column={2} style={{ width: '100%' }} size='small' bstoreed items={[
+                    <Divider classNames={{ root: s.dividerRoot, rail: s.divider, content: s.divider }} orientation="left">基本信息</Divider>
+                    <Descriptions labelStyle={{ width: '20%' }} classNames={{ root: s.descRoot, label: s.descLabel, content: s.descContent }} column={2} style={{ width: '100%' }} size='small' bordered items={[
                         {
                             key: '1',
                             label: '店铺ID',
@@ -204,52 +227,80 @@ export default function store() {
                         },
                         {
                             key: '2',
-                            label: '店铺号',
-                            children: rowInfo.storeNo,
+                            label: '店铺名称',
+                            children: rowInfo.name,
                         },
                         {
                             key: '3',
-                            label: '店铺状态',
-                            children: rowInfo.storeState,
+                            label: '店铺头像',
+                            span: 2,
+                            children: <Avatar shape="square" src={rowInfo.avatar} alt="avatar" size="large" draggable={false} />,
                         },
                         {
                             key: '4',
-                            label: '创建时间',
-                            children: rowInfo.storeTime, // TODO: 由于调用timeToDate是异步的，这里需要在初始化后直接用转换的值
+                            label: '公告',
+                            span: 2,
+                            children: rowInfo.bulletin,
                         },
                         {
                             key: '5',
-                            label: '店铺金额',
-                            children: rowInfo.storeAmount ? `￥ ${rowInfo.storeAmount.toFixed(2)}` : '',
+                            label: '描述',
+                            span: 2,
+                            children: rowInfo.description,
                         },
                         {
                             key: '6',
-                            label: '备注',
-                            children: rowInfo.remarks,
-                        }
+                            label: '营业时间',
+                            children: rowInfo.date,
+                        },
+                        {
+                            key: '7',
+                            label: '起送价',
+                            children: '￥' + rowInfo.minPrice,
+                        },
+                        {
+                            key: '8',
+                            label: '配送时间',
+                            children: rowInfo.deliveryTime + ' 分钟',
+                        },
+                        {
+                            key: '9',
+                            label: '配送费',
+                            children: '￥' + rowInfo.deliveryPrice,
+                        },
                     ]} />
-                    <Divider classNames={{ root: s.dividerRoot, rail: s.divider, content: s.divider }}orientation="left">运输信息</Divider>
-                    <Descriptions classNames={{ root: s.descRoot, label: s.descLabel, content: s.descContent }} column={2} style={{ width: '100%' }} bstoreed items={[
+                    <Divider classNames={{ root: s.dividerRoot, rail: s.divider, content: s.divider }} orientation="left">运营信息</Divider>
+                    <Descriptions classNames={{ root: s.descRoot, label: s.descLabel, content: s.descContent }} column={2} style={{ width: '100%' }} bordered items={[
                         {
                             key: '1',
-                            label: '收件人',
-                            children: rowInfo.consignee,
+                            label: '评分',
+                            children: rowInfo.rating,
                         },
                         {
                             key: '2',
-                            label: '手机号',
-                            children: rowInfo.phone,
+                            label: '销量',
+                            children: rowInfo.sellCount,
                         },
                         {
                             key: '3',
-                            label: '收货地址',
+                            label: '活动',
                             span: 2,
-                            children: rowInfo.deliverAddress,
+                            children: <div>{rowInfo.supports && rowInfo.supports.length > 0 ? rowInfo.supports.map((act, index) => (
+                                <><Typography.Text className={s.cardTitle} key={index}>{index + 1}：{act}</Typography.Text><br /></>
+                            )) : '无活动'}</div>
                         },
                         {
                             key: '4',
-                            label: '收货时间',
-                            children: rowInfo.deliveryTime,
+                            label: '店铺图片',
+                            span: 2,
+                            children: <Carousel autoplay>
+                                {rowInfo.pics && rowInfo.pics.length > 0 ? rowInfo.pics.map((img, index) => (
+                                    <div key={index}>
+                                        <img src={img} alt={`store-img-${index}`} style={{ width: '100%', maxHeight: '230px', objectFit: 'cover' }} draggable={false} />
+                                    </div>
+                                )) : <Typography.Text className={s.cardTitle}> 无店铺图片 </Typography.Text>
+                                }
+                            </Carousel>,
                         }
                     ]} />
                 </Flex>
@@ -257,10 +308,10 @@ export default function store() {
             {/* 编辑 */}
             < Modal
                 title="编辑店铺"
+                width={800}
                 open={editDia}
                 footer={null}
-                onCancel={() => setEditDia(false)
-                }
+                onCancel={() => setEditDia(false)}
                 destroyOnHidden={true}
                 mask={{ blur: false }}
                 centered
@@ -286,109 +337,125 @@ export default function store() {
                 >
                     <Flex justify="space-between" align="center" wrap style={{ width: '100%' }} >
                         <Form.Item
-                            label="店铺号"
-                            name="storeNo"
-                            initialValue={editForm.storeNo}
-                            style={{ width: '45%' }}
-                            rules={[{ required: true, message: '请输入店铺号!' }]}
+                            label="店铺ID"
+                            style={{ width: '23%' }}
                         >
-                            <Input className={s.input} allowClear placeholder="请输入店铺号" />
+                            <Input className={s.input} value={editForm.id} disabled />
                         </Form.Item>
 
                         <Form.Item
-                            label="店铺金额"
-                            name="storeAmount"
-                            initialValue={editForm.storeAmount}
-                            style={{ width: '45%' }}
-                            rules={[{ required: true, message: '请输入店铺金额!' }]}
+                            label="店铺名称"
+                            name="name"
+                            initialValue={editForm.name}
+                            style={{ width: '23%' }}
+                            rules={[{ required: true, message: '请输入店铺名称!' }]}
                         >
-                            <Input className={s.input} allowClear placeholder="请输入店铺金额" />
+                            <Input className={s.input} allowClear placeholder="请输入店铺名称" />
                         </Form.Item>
 
                         <Form.Item
-                            label="收货人"
-                            name="consignee"
-                            initialValue={editForm.consignee}
-                            style={{ width: '45%' }}
-                            rules={[{ required: true, message: '请输入收货人!' }]}
+                            label="店铺头像"
+                            name="avatar"
+                            style={{ width: '23%' }}
                         >
-                            <Input className={s.input} allowClear placeholder="请输入收货人" />
+                            <Input className={s.input} disabled placeholder="图片上传功能未启用" />
                         </Form.Item>
 
                         <Form.Item
-                            label="收货手机号"
-                            name="phone"
-                            initialValue={editForm.phone}
-                            style={{ width: '45%' }}
-                            rules={[{ required: true, message: '请输入收货手机号!' }]}
+                            label="店铺图片"
+                            name="pics"
+                            style={{ width: '23%' }}
                         >
-                            <Input className={s.input} allowClear placeholder="请输入手机号" />
+                            <Input className={s.input} disabled placeholder="图片上传功能未启用" />
                         </Form.Item>
 
                         <Form.Item
-                            label="收货地址"
-                            name="deliverAddress"
-                            initialValue={editForm.deliverAddress}
-                            style={{ width: '100%' }}
-                            rules={[{ required: true, message: '请输入收货地址!' }]}
+                            label="配送时间（分钟）"
+                            name="deliveryTime"
+                            initialValue={editForm.deliveryTime}
+                            style={{ width: '23%' }}
+                            rules={[{ required: true, message: '请输入配送时间!' }]}
                         >
-                            <Input className={s.input} allowClear placeholder="请输入收货地址" />
+                            <InputNumber className={s.input} placeholder="请输入配送时间" min={0} style={{ width: '100%' }} />
                         </Form.Item>
 
                         <Form.Item
-                            label="店铺状态"
-                            name="storeState"
-                            initialValue={editForm.storeState}
-                            style={{ width: '45%' }}
-                            rules={[{ required: true, message: '请选择店铺状态!' }]}
+                            label="配送费"
+                            name="deliveryPrice"
+                            initialValue={editForm.deliveryPrice}
+                            style={{ width: '23%' }}
+                            rules={[{ required: true, message: '请输入配送费!' }]}
                         >
-                            <Select
-                                className={s.selectRoot}
-                                classNames={{
-                                        popup: {
-                                            root: s.selectPopup,
-                                            listItem: s.selectListItem
-                                        }
-                                    }}
-                                placeholder="请选择店铺状态"
-                                options={stateOptions}
+                            <InputNumber className={s.input} placeholder="请输入配送费" min={0} precision={2} style={{ width: '100%' }} />
+                        </Form.Item>
+
+                        <Form.Item
+                            label="评分"
+                            name="score"
+                            initialValue={editForm.score}
+                            style={{ width: '23%' }}
+                            rules={[{ required: true, message: '请输入评分!' }]}
+                        >
+                            <InputNumber className={s.input} placeholder="请输入评分" min={0} max={5} precision={1} style={{ width: '100%' }} />
+                        </Form.Item>
+
+                        <Form.Item
+                            label="销量"
+                            name="sellCount"
+                            initialValue={editForm.sellCount}
+                            style={{ width: '23%' }}
+                            rules={[{ required: true, message: '请输入销量!' }]}
+                        >
+                            <InputNumber className={s.input} placeholder="请输入销量" min={0} style={{ width: '100%' }} />
+                        </Form.Item>
+
+                        <Form.Item
+                            label="公告"
+                            name="bulletin"
+                            initialValue={editForm.bulletin}
+                            style={{ width: '48%' }}
+                            rules={[{ required: true, message: '请输入公告!' }]}
+                        >
+                            <TextArea className={s.input} allowClear placeholder="请输入公告" rows={2} />
+                        </Form.Item>
+
+                        <Form.Item
+                            label="描述"
+                            name="description"
+                            initialValue={editForm.description}
+                            style={{ width: '48%' }}
+                            rules={[{ required: true, message: '请输入描述!' }]}
+                        >
+                            <TextArea className={s.input} allowClear placeholder="请输入描述" rows={2} />
+                        </Form.Item>
+
+                        <Form.Item
+                            label="营业时间"
+                            name="date"
+                            initialValue={editForm.date}
+                            style={{ width: '48%' }}
+                            rules={[{ required: true, message: '请选择营业时间!' }]}
+                        >
+                            <RangePicker
+                                size="large"
+                                showTime
+                                placeholder={['开始时间', '结束时间']}
+                                format={{
+                                    format: 'YYYY-MM-DD HH:mm:ss',
+                                    type: 'mask',
+                                }}
+                                style={{ width: '100%' }}
                             />
                         </Form.Item>
 
                         <Form.Item
-                            label="备注"
-                            name="remarks"
-                            initialValue={editForm.remarks}
-                            style={{ width: '45%' }}
-                            rules={[{ required: true, message: '请输入备注!' }]}
+                            label="活动（每行一个）"
+                            name="supports"
+                            initialValue={editForm.supports}
+                            style={{ width: '48%' }}
+                            rules={[{ required: false }]}
                         >
-                            <Input className={s.input} allowClear placeholder="请输入备注" />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="下单时间"
-                            name="storeTime"
-                            initialValue={editForm.storeTime}
-                            style={{ width: '45%' }}
-                            rules={[{ required: true, message: '请输入下单时间!' }]}
-                        >
-                            <DatePicker showTime placeholder="请输入时间" format={{
-                                format: 'YYYY-MM-DD HH:mm:ss',
-                                type: 'mask',
-                            }} />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="收货时间"
-                            name="deliveryTime"
-                            initialValue={editForm.deliveryTime}
-                            style={{ width: '45%' }}
-                            rules={[{ required: true, message: '请输入收货时间!' }]}
-                        >
-                            <DatePicker showTime placeholder="请输入时间" format={{
-                                format: 'YYYY-MM-DD HH:mm:ss',
-                                type: 'mask',
-                            }} />
+                            <TextArea className={s.input} allowClear placeholder="每行输入一个活动，例如：\n玉米浓浓堡上心\n美团配送满25-5" rows={2} />
                         </Form.Item>
                     </Flex>
 

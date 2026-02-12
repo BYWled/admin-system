@@ -13,11 +13,17 @@ body,
 
 .verifyCode {
     height: 32px;
-    width: 50%;
-    padding: 1px;
+    width: 25%;
     border-radius: 4px;
+}
+
+.verifyCodeText {
+    height: 32px;
+    width: 25%;
     display: flex;
     align-items: center;
     justify-content: center;
     user-select: none;
+    position: absolute;
+    bottom: 10000px;
 }
