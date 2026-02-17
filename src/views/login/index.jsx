@@ -85,7 +85,6 @@ export default function Login() {
                         </Form.Item>
                         <Form.Item>
                             <Button htmlType="submit" ghost className={s.loginBtn} type="primary" size='large'>登录</Button>
-                            <Text italic={true} style={{ fontSize: '10px', color: '#999' }}>请使用HTTP协议访问网页，HTTPS会发生报错</Text>
                         </Form.Item>
                     </Form>
                     <Divider classNames={{ root: s.dividerRoot, rail: s.divider, content: s.divider }}style={{ margin: '20px 0' }}>more</Divider>
