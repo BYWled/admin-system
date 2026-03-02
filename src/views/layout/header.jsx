@@ -28,6 +28,7 @@ export default function LeftHeader(props) {
             path: '/' + urlArr[0]
         };
         if (urlArr.length > 1) {
+            urlArr[0].path = '/home'; // 一级路径溯源回首页
             const currentLv2Router = currentLv1Router.children.find(c => c.path === urlArr[1]);
             urlArr[1] = {
                 title: (
