@@ -127,7 +127,7 @@ export default function layout() {
     navigate('/login');
   }
 
-  // 动态元素构造相关函数
+  // 锁屏步骤配置
   const lock = [
     {
       // 移除 title，或改为更简洁的欢迎语
