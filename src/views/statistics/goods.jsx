@@ -31,8 +31,9 @@ export default function statisticsGoods() {
                 data: item.data
             }
         });
-        const echartsDom = echarts.init(document.querySelector('#echartsGoods'));
-        echartsDom.setOption({
+        const echartsDom = document.querySelector('#echartsGoods');
+        const echartsTable = echarts.init(echartsDom);
+        echartsTable.setOption({
             title: { text: '商品统计', top: 0 },
             xAxis: { data: res.data.date },
             yAxis: {},
@@ -49,6 +50,10 @@ export default function statisticsGoods() {
             },
             series: chartSeries
         });
+
+        // 监听图标自适应
+        const resizeObserver = new ResizeObserver(() => echartsTable.resize());
+        resizeObserver.observe(echartsDom);
     }
 
     useEffect(() => {

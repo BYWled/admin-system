@@ -32,9 +32,12 @@ export default function home() {
             setEmptyCharts(true);
             return message.info('暂无用户统计数据');
         };
+
         // 处理图表
         const chartLegendData = [];
         const chartLegendSelected = [];
+        const echartsDom = document.querySelector('#echartsStats');
+        const echartsTable = echarts.init(echartsDom);
         const chartSeries = res.data.source.map(item => {
             // 处理最大涨幅和降幅
             if (item.type === '注册人数') {
@@ -70,8 +73,7 @@ export default function home() {
                 data: item.data
             }
         });
-        const echartsDom = echarts.init(document.querySelector('#echartsStats'));
-        echartsDom.setOption({
+        echartsTable.setOption({
             xAxis: { data: res.data.date },
             yAxis: {},
             legend: {
@@ -87,6 +89,10 @@ export default function home() {
             },
             series: chartSeries
         });
+        // 监听图标自适应
+        const resizeObserver = new ResizeObserver(() => echartsTable.resize());
+        resizeObserver.observe(echartsDom);
+
         setLoading(false);
     }
 
@@ -138,14 +144,16 @@ export default function home() {
                             <Button type="primary" href="https://www.wled.top" target="_blank" rel="noopener noreferrer" >访问开发者主页</Button>
                         </Flex>
                     </Card>
-                    <Card classNames={{ root: s.cardRoot, header: s.cardHeader, title: s.cardTitle }} variant="borderless" style={{ width: '100%', height: '25vh' }} title="总销售数据" >
-                        <Flex justify="space-evenly" align="center">
+                    <Card classNames={{ root: s.cardRoot, header: s.cardHeader, title: s.cardTitle, body: s.homeCardBody }} variant="borderless" style={{ width: '100%', height: '25vh' }} title="总销售数据" >
+                        <Flex style={{ height: "100%" }} justify="space-evenly" align="center">
                             <Flex wrap align="center">
                                 <Typography.Text className={s.cardGary} style={{ width: '100%' }} >总订单数</Typography.Text>
                                 <Statistic
                                     precision={0}
+                                    suffix="单"
                                     formatter={() => <CountUp end={allOrders} separator="," />}
                                     styles={{ content: { fontSize: '32px', fontWeight: 'bold', color: 'var(--textColor)' } }}
+                                    style={{ marginBottom: "22px" }}
                                 />
                             </Flex>
                             <Flex wrap align="center">
@@ -155,14 +163,15 @@ export default function home() {
                                     prefix="¥"
                                     formatter={() => <CountUp end={allSales} separator="," />}
                                     styles={{ content: { fontSize: '32px', fontWeight: 'bold', color: 'var(--textColor)' } }}
+                                    style={{ marginBottom: "22px" }}
                                 />
                             </Flex>
                         </Flex>
                     </Card>
                 </Flex>
                 <Flex gap="20px" wrap style={{ width: 'calc(67% - 10px)' }}>
-                    <Card classNames={{ root: s.cardRoot, header: s.cardHeader, title: s.cardTitle }} variant="borderless" title="用户数据" style={{ width: 'calc(50% - 10px)', height: '25vh' }} >
-                        <Flex justify="space-evenly" align="center">
+                    <Card classNames={{ root: s.cardRoot, header: s.cardHeader, title: s.cardTitle, body: s.homeCardBody }} variant="borderless" title="用户数据" style={{ width: 'calc(50% - 10px)', height: '25vh' }} >
+                        <Flex style={{ height: "100%" }} justify="space-evenly" align="center">
                             <Flex wrap align="center">
                                 <Typography.Text className={s.cardGary} style={{ width: '100%' }} >最大涨幅</Typography.Text>
                                 <Statistic
@@ -171,6 +180,7 @@ export default function home() {
                                     styles={{ content: { color: '#cf1322' } }}
                                     prefix={<ArrowUpOutlined />}
                                     suffix="%"
+                                    style={{ marginBottom: "22px" }}
                                 />
                             </Flex>
                             <Flex wrap align="center">
@@ -181,12 +191,13 @@ export default function home() {
                                     styles={{ content: { color: '#3f8600' } }}
                                     prefix={<ArrowDownOutlined />}
                                     suffix="%"
+                                    style={{ marginBottom: "22px" }}
                                 />
                             </Flex>
                         </Flex>
                     </Card>
-                    <Card classNames={{ root: s.cardRoot, header: s.cardHeader, title: s.cardTitle }} variant="borderless" title="订单数据" style={{ width: 'calc(50% - 10px)', height: '25vh' }} >
-                        <Flex justify="space-evenly" align="center">
+                    <Card classNames={{ root: s.cardRoot, header: s.cardHeader, title: s.cardTitle, body: s.homeCardBody }} variant="borderless" title="订单数据" style={{ width: 'calc(50% - 10px)', height: '25vh' }} >
+                        <Flex style={{ height: "100%" }} justify="space-evenly" align="center">
                             <Flex wrap align="center">
                                 <Typography.Text className={s.cardGary} style={{ width: '100%' }} >最大涨幅</Typography.Text>
                                 <Statistic
@@ -195,6 +206,7 @@ export default function home() {
                                     styles={{ content: { color: '#cf1322' } }}
                                     prefix={<ArrowUpOutlined />}
                                     suffix="%"
+                                    style={{ marginBottom: "22px" }}
                                 />
                             </Flex>
                             <Flex wrap align="center">
@@ -205,6 +217,7 @@ export default function home() {
                                     styles={{ content: { color: '#3f8600' } }}
                                     prefix={<ArrowDownOutlined />}
                                     suffix="%"
+                                    style={{ marginBottom: "22px" }}
                                 />
                             </Flex>
                         </Flex>

@@ -145,6 +145,10 @@
     color: var(--textColor) !important;
 }
 
+.homeCardBody {
+    height: calc(100% - 56px);
+}
+
 .cardGary {
     color: color-mix(in srgb, var(--textColor) 40%, #eee);
 }
