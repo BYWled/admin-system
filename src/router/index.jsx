@@ -11,10 +11,11 @@ import GoodsStatistics from '../views/statistics/goods.jsx'
 import OrderStatistics from '../views/statistics/order.jsx'
 import Permission from '../views/character/permission.jsx'
 import Role from '../views/character/role.jsx'
-import { HomeOutlined, AppstoreOutlined, ShopOutlined, ContainerOutlined, BarChartOutlined, TeamOutlined, LockOutlined, LoadingOutlined } from '@ant-design/icons';
+import { HomeOutlined, AppstoreOutlined, ShopOutlined, ContainerOutlined, BarChartOutlined, TeamOutlined, LockOutlined, LoadingOutlined, CloseCircleOutlined, SmileOutlined } from '@ant-design/icons';
 import { verifyTokenApi } from '../api/loginApi.js';
-import { App, Spin } from 'antd'
+import { App, Spin, Button, Result, Typography } from 'antd'
 import { useState, useEffect } from 'react';
+const { Paragraph, Text } = Typography;
 
 // TODO:前置守卫
 const BeforeEach = ({ callback }) => {
@@ -105,6 +106,47 @@ const BeforeEach = ({ callback }) => {
     // 检查通过，渲染原本的组件
     return callback || null;
 };
+
+// 404错误页组件
+const ErrorPage = () => {
+    return (
+        <Result
+            status="404"
+            title="404 页面未找到"
+            subTitle="哎呀，页面不存在了o(╥﹏╥)o"
+            extra={[<Button type="primary" key={'404Re'} onClick={() => window.location.href = '/'}>回到首页</Button>]}
+
+        >
+            <div className="desc">
+                <Paragraph>
+                    <Text
+                        strong
+                        style={{
+                            fontSize: 16,
+                        }}
+                    >
+                        除此之外，你也可以：
+                    </Text>
+                </Paragraph>
+                <Paragraph>
+                    <CloseCircleOutlined className="site-result-demo-error-icon" /> 检查一下地址是否正确。
+                </Paragraph>
+                <Paragraph>
+                    <SmileOutlined /> 拷打一下作者：
+                    <Button color="geekblue" styles={{
+                        root: {
+                            height: '100%',
+                            padding: 0,
+                        }
+                    }}
+                        onClick={() => window.open('https://github.com/BYWled', '_blank')}
+                        variant="link">BYWled
+                    </Button>
+                </Paragraph>
+            </div>
+        </Result >
+    );
+}
 
 // 静态路由配置
 export const staticRouter = [
@@ -253,7 +295,11 @@ export const staticRouter = [
                 label: '权限列表'
             }
         ]
-    }
+    },
+    {
+        path: "*",
+        element: <BeforeEach callback={<ErrorPage />} />,
+    },
 ]
 
 // 创建路由对象
