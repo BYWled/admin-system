@@ -24,3 +24,8 @@ export const deleteGoodsApi = (params) => {
 export const getCategoryApi = () => {
     return service.get('/goods/categories');
 }
+
+// 上传商品图
+export const uploadGoodsImgApi = (data) => {
+    return service.post('/goods/goods_img_upload', data);
+}

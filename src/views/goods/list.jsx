@@ -1,12 +1,23 @@
 import { useState, useEffect } from 'react';
-import { App, Form, Flex, Card, Button, Input, Popconfirm, Table, Typography, Modal, Avatar, InputNumber, Select, Descriptions, Divider, Pagination } from 'antd';
-import { getGoodsApi, addGoodsApi, editGoodsApi, deleteGoodsApi, getCategoryApi } from '../../api/goodsApi';
+import { App, Form, Flex, Card, Button, Input, Popconfirm, Table, Typography, Modal, Avatar, InputNumber, Select, Descriptions, Divider, Pagination, Image, Upload } from 'antd';
+import { getGoodsApi, addGoodsApi, editGoodsApi, deleteGoodsApi, getCategoryApi, uploadGoodsImgApi } from '../../api/goodsApi';
 import { timeToDate, numToTime } from '../../utils/time';
-import { FilterOutlined } from '@ant-design/icons';
+import { FilterOutlined, PlusOutlined } from '@ant-design/icons';
 import { baseURL } from '../../utils/service';
 import s from '../../styles/layout.module.scss'
+import ImgCrop from 'antd-img-crop';
+
+// 将文件转换为Base64格式，供图片预览使用
+const getBase64 = file =>
+    new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
 
 export default function goods() {
+    // ******************初始化变量、Hooks******************
     const { message } = App.useApp();
     const [form] = Form.useForm();
     const [pageSize, setPageSize] = useState(10);
@@ -21,6 +32,12 @@ export default function goods() {
     const [pageLoading, setPageLoading] = useState(true);
     const [infoDia, setInfoDia] = useState(false);
     const [rowInfo, setRowInfo] = useState({});
+    // 图片预览相关
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const [previewImage, setPreviewImage] = useState('');
+    const [file, setFile] = useState(null);
+    const [fileList, setFileList] = useState([]);
+    const [fileUrl, setFileUrl] = useState(null);
 
     // 表单提交按钮
     const SubmitButton = ({ form, children, loading }) => {
@@ -39,6 +56,64 @@ export default function goods() {
             </Button>
         );
     };
+    // ========== 图片上传相关 ==============
+    // 清除图片缓存
+    const clearFileCache = () => {
+        setFile(null);
+        setFileList([]);
+        setFileUrl(null);
+        setPreviewImage('');
+    };
+    // 文件上传监听，上传成功后调用修改头像接口并更新用户信息
+    useEffect(() => {
+        const uploadAvatar = async () => {
+            if (file) {
+                try {
+                    // 上传图片
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    const uploadRes = await uploadGoodsImgApi(formData);
+                    if (uploadRes.code) {
+                        message.error(`上传图片失败: ${uploadRes.msg}`);
+                        return;
+                    }
+                    const filename = uploadRes.imgUrl ? uploadRes.imgUrl.split('/').pop() : uploadRes.imgUrl; // 按路径分割，取最后一部分作为文件名
+                    setFileUrl(filename);
+                } catch (e) {
+                    setFileList([{ ...fileList[0], status: 'error' }]);
+                    message.error('上传图片失败');
+                    console.error('上传图片失败:', e);
+                }
+            }
+        };
+        uploadAvatar();
+    }, [file]);
+
+    // 图片预览
+    const handlePreview = async file => {
+        let src = file.url;
+        if (!src) {
+            src = await new Promise(resolve => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file.originFileObj);
+                reader.onload = () => resolve(reader.result);
+            });
+        }
+        if (!file.url && !file.preview) {
+            file.preview = await getBase64(file.originFileObj);
+        }
+        setPreviewImage(file.url || file.preview);
+        setPreviewOpen(true);
+    };
+
+    // 图片上传变化
+    const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
+    const uploadButton = (
+        <button style={{ border: 0, background: 'none' }} type="button">
+            <PlusOutlined />
+            <div style={{ marginTop: 8 }}>Upload</div>
+        </button>
+    );
 
     // =========== 获取列表 ==============
     const getTableData = async () => {
@@ -102,7 +177,7 @@ export default function goods() {
             name: values.name,
             category: values.category,
             goodsDesc: values.description,
-            imgUrl: values.imgUrl || 'imgUrl',
+            imgUrl: fileUrl || 'imgUrl',
             price: values.price,
         });
         if (res.code) {
@@ -114,9 +189,17 @@ export default function goods() {
         getTableData();
         form.resetFields();
         setAddDia(false);
+        clearFileCache();
+    };
+
+    const cancelAdd = () => {
+        form.resetFields();
+        clearFileCache();
+        setAddDia(false);
     };
 
     // =========== 编辑商品 ==============
+    // 可操作列
     const EditableCell = ({
         editing,
         dataIndex,
@@ -140,8 +223,34 @@ export default function goods() {
                             },
                         ]}
                     >
-                        {dataIndex === 'price' ? <InputNumber className={s.input} step="0.01" precision={2} /> :
-                            dataIndex === 'imgUrl' ? <>{/* TODO:上传图片预留 */}</> :
+                        {dataIndex === 'price' ? <InputNumber style={{ width: '100%' }} prefix="¥" className={s.input} step="0.01" precision={2} /> :
+                            dataIndex === 'imgUrl' ? <>
+                                <ImgCrop rotationSlider>
+                                    <Upload
+                                        beforeUpload={file => {
+                                            setFile(file);
+                                            return false;
+                                        }}
+                                        listType="picture-card"
+                                        fileList={fileList}
+                                        onPreview={handlePreview}
+                                        onChange={handleChange}
+                                    >
+                                        {fileList.length >= 1 ? null : uploadButton}
+                                    </Upload>
+                                </ImgCrop>
+                                {previewImage && (
+                                    <Image
+                                        styles={{ root: { display: 'none' } }}
+                                        preview={{
+                                            open: previewOpen,
+                                            onOpenChange: visible => setPreviewOpen(visible),
+                                            afterOpenChange: visible => !visible && setPreviewImage(''),
+                                        }}
+                                        src={previewImage}
+                                    />
+                                )}
+                            </> :
                                 dataIndex === 'category' ? <Select className={s.selectRoot}
                                     classNames={{
                                         popup: {
@@ -159,10 +268,17 @@ export default function goods() {
     };
     // 打开编辑商品
     const edit = record => {
+        clearFileCache(); // 取消编辑时清除图片缓存
+        setFileList([{
+            uid: '-1',
+            name: 'currentImg',
+            status: 'done',
+            url: `${baseURL}${record.imgUrl}`,
+        }]);
         form.setFieldsValue({
             name: record.name,
             price: record.price,
-            imgUrl: record.imgUrl,
+            imgUrl: `${baseURL}${record.imgUrl}`,
             goodsDesc: record.goodsDesc,
             category: record.category
         });
@@ -170,6 +286,7 @@ export default function goods() {
     };
     const cancel = () => {
         setEditingKey('');
+        clearFileCache(); // 取消编辑时清除图片缓存
         form.resetFields(); // 重置表单
     };
     // 保存编辑
@@ -183,7 +300,7 @@ export default function goods() {
                 id: item.key,
                 name: row.name,
                 price: row.price,
-                imgUrl: row.imgUrl,
+                imgUrl: `${fileUrl || item.imgUrl.split('/').pop()}`,
                 goodsDesc: row.goodsDesc,
                 category: row.category,
             });
@@ -202,8 +319,10 @@ export default function goods() {
             setData(newData);
             setEditingKey('');
         }
+        clearFileCache(); // 取消编辑时清除图片缓存
         form.resetFields(); // 重置表单
         message.success('商品修改成功');
+        getTableData(); // 刷新列表数据
     };
 
     // ================ 删除商品 ==============
@@ -359,7 +478,7 @@ export default function goods() {
             title="添加商品"
             open={addDia}
             footer={null}
-            onCancel={() => setAddDia(false)}
+            onCancel={cancelAdd}
             destroyOnHidden={true}
             mask={{ blur: false }}
             classNames={{
@@ -387,7 +506,31 @@ export default function goods() {
                     name="imgUrl"
                     prefix={<FilterOutlined />}
                 >
-                    <Input className={s.input} defaultValue={'当前未启用上传图片功能'} disabled placeholder="请输入商品图片" />
+                    <ImgCrop rotationSlider>
+                        <Upload
+                            beforeUpload={file => {
+                                setFile(file);
+                                return false;
+                            }}
+                            listType="picture-card"
+                            fileList={fileList}
+                            onPreview={handlePreview}
+                            onChange={handleChange}
+                        >
+                            {fileList.length >= 1 ? null : uploadButton}
+                        </Upload>
+                    </ImgCrop>
+                    {previewImage && (
+                        <Image
+                            styles={{ root: { display: 'none' } }}
+                            preview={{
+                                open: previewOpen,
+                                onOpenChange: visible => setPreviewOpen(visible),
+                                afterOpenChange: visible => !visible && setPreviewImage(''),
+                            }}
+                            src={previewImage}
+                        />
+                    )}
                 </Form.Item>
 
                 <Form.Item
