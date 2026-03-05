@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { changePassApi } from '../../api/userApi';
 import { getUserApi, addUserApi, deleteUserApi, batchDeleteUserApi, editUserApi } from '../../api/userListApi';
 import { timeToDate } from '../../utils/time';
-import { App, Avatar, Button, Card, Flex, Table, Modal, Form, Input, Select, Popconfirm, Pagination, ConfigProvider } from 'antd'
+import { App, Avatar, Button, Card, Flex, Table, Modal, Form, Input, Select, Popconfirm, Pagination } from 'antd'
 import { UserOutlined, LockOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import s from '../../styles/layout.module.scss'
 import VCode from '../../utils/verifyCode';
@@ -293,6 +293,18 @@ export default function User() {
                         <Input className={s.input} allowClear placeholder="请输入用户名" />
                     </Form.Item>
 
+                    <Form.Item label="身份组" name="userGroup" rules={[{ required: true, message: '请选择身份组!' }]}>
+                        <Select className={s.selectRoot} classNames={{
+                            popup: {
+                                root: s.selectPopup,
+                                listItem: s.selectListItem
+                            }
+                        }} placeholder="请选择身份组">
+                            <Select.Option value="超级管理员">超级管理员</Select.Option>
+                            <Select.Option value="普通管理员">普通管理员</Select.Option>
+                        </Select>
+                    </Form.Item>
+
                     <Form.Item
                         label="密码"
                         name="password"
@@ -316,18 +328,6 @@ export default function User() {
                         })]}
                     >
                         <Input.Password className={s.input} allowClear placeholder="请输入确认密码" />
-                    </Form.Item>
-
-                    <Form.Item label="身份组" name="userGroup" rules={[{ required: true, message: '请选择身份组!' }]}>
-                        <Select className={s.selectRoot} classNames={{
-                                        popup: {
-                                            root: s.selectPopup,
-                                            listItem: s.selectListItem
-                                        }
-                                    }} placeholder="请选择身份组">
-                            <Select.Option value="超级管理员">超级管理员</Select.Option>
-                            <Select.Option value="普通管理员">普通管理员</Select.Option>
-                        </Select>
                     </Form.Item>
 
                     <Form.Item label="验证码" name="inCaptcha"
@@ -386,11 +386,11 @@ export default function User() {
 
                     <Form.Item label="身份组" name="userGroup" initialValue={editForm.userGroup} rules={[{ required: true, message: '请选择身份组!' }]}>
                         <Select className={s.selectRoot} classNames={{
-                                        popup: {
-                                            root: s.selectPopup,
-                                            listItem: s.selectListItem
-                                        }
-                                    }} placeholder="请选择身份组">
+                            popup: {
+                                root: s.selectPopup,
+                                listItem: s.selectListItem
+                            }
+                        }} placeholder="请选择身份组">
                             <Select.Option value="超级管理员">超级管理员</Select.Option>
                             <Select.Option value="普通管理员">普通管理员</Select.Option>
                         </Select>

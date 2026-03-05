@@ -24,3 +24,13 @@ export const batchDeleteUserApi = (params) => {
 export const editUserApi = (data) => {
     return service.post('/users/edit', data);
 }
+
+// 上传头像接口
+export const changeAvatarApi = (data) => {
+    return service.post('/users/avatar_upload', data);
+}
+
+// 修改用户头像
+export const editUserAvatarApi = (params) => {
+    return service.get('/users/avataredit', { params });
+}

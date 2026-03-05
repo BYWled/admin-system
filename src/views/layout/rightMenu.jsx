@@ -1,9 +1,21 @@
 import { useEffect, useState } from 'react'
 import { userInfoApi, checkPassApi, changePassApi } from '../../api/userApi'
+import { changeAvatarApi, editUserAvatarApi } from '../../api/userListApi'
 import VCode from '../../utils/verifyCode'
-import { LockOutlined, SunFilled, MoonFilled, BorderTopOutlined, BorderLeftOutlined, CheckOutlined, LogoutOutlined, EditOutlined, FullscreenOutlined } from '@ant-design/icons'
-import { App, Drawer, Flex, Modal, Input, Avatar, Card, Typography, Form, Button, Switch } from 'antd'
+import { LockOutlined, SunFilled, MoonFilled, BorderTopOutlined, BorderLeftOutlined, CheckOutlined, LogoutOutlined, EditOutlined, FullscreenOutlined, PlusOutlined } from '@ant-design/icons'
+import { App, Drawer, Flex, Modal, Input, Card, Typography, Form, Button, Switch, Image, Upload } from 'antd'
 import s from '../../styles/layout.module.scss'
+import ImgCrop from 'antd-img-crop';
+import { baseURL } from '../../utils/service'
+
+// 将文件转换为Base64格式，供图片预览使用
+const getBase64 = file =>
+    new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
 
 export default function RightMenu(props) {
     // ******************初始化变量、Hooks******************
@@ -20,22 +32,79 @@ export default function RightMenu(props) {
     const [captcha, setCaptcha] = useState('');
     const [fresh, setFresh] = useState(0); // 用于刷新验证码
     const { id, role } = localStorage.getItem('admin') ? JSON.parse(localStorage.getItem('admin')) : {};
+    // 图片预览相关
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const [previewImage, setPreviewImage] = useState('');
+    const [file, setFile] = useState(null);
+    const [fileList, setFileList] = useState([
+        {
+            uid: '-1',
+            name: 'image.png',
+            status: 'done',
+            url: 'https://www.wled.top/images/Oz-Vessalius-avatar.svg',
+        }
+    ]);
 
     // ******************副作用函数部分，用作生命周期与监听******************
     // 获取用户信息
-    useEffect(() => {
-        const fetchUserInfo = async () => {
-            try {
-                const res = await userInfoApi({ id });
-                if (!res.accountInfo) message.error('用户信息不存在');
-                setUserInfo(res.accountInfo);
-            } catch (e) {
-                message.error('获取用户信息失败');
-                console.error('获取用户信息失败:', e);
+    const fetchUserInfo = async () => {
+        try {
+            const res = await userInfoApi({ id });
+            if (!res.accountInfo) message.error('用户信息不存在');
+            setUserInfo(res.accountInfo);
+            // 如果不是默认头像则设置上传组件的fileList以显示当前头像
+            if (res.accountInfo.imgUrl !== "/upload/imgs/acc_img/default.jpg") {
+                setFileList([{
+                    uid: '-1',
+                    name: 'avatar.png',
+                    status: 'done',
+                    url: `${baseURL}${res.accountInfo.imgUrl}`
+                }]);
             }
-        };
+
+        } catch (e) {
+            message.error('获取用户信息失败');
+            console.error('获取用户信息失败:', e);
+        }
+    };
+    useEffect(() => {
         fetchUserInfo();
     }, []);
+
+    // 文件上传监听，上传成功后调用修改头像接口并更新用户信息
+    useEffect(() => {
+        const uploadAvatar = async () => {
+            if (file) {
+                try {
+                    // 调用修改头像接口
+                    const formData = new FormData();
+                    formData.append('id', id);
+                    formData.append('file', file);
+                    const res = await changeAvatarApi(formData);
+                    if (res.code) {
+                        message.error('修改头像失败');
+                        setFileList([{ ...fileList[0], status: 'error' }]);
+                        return;
+                    }
+                    message.success('头像上传成功');
+                    await editUserAvatarApi({ id, imgUrl: res.imgUrl });
+                    if (res.code) {
+                        message.error('修改头像失败');
+                        setFileList([{ ...fileList[0], status: 'error' }]);
+                        return;
+                    }
+                    message.success('头像修改成功');
+                    // 更新用户信息
+                    fetchUserInfo();
+                } catch (e) {
+                    setFileList([{ ...fileList[0], status: 'error' }]);
+                    message.error('修改头像失败');
+                    console.error('修改头像失败:', e);
+                }
+            }
+        };
+        uploadAvatar();
+    }, [file]);
 
     // 刷新验证码
     useEffect(() => {
@@ -120,6 +189,30 @@ export default function RightMenu(props) {
         setInCaptcha('');
     }
 
+    // 图片预览相关
+    const handlePreview = async file => {
+        let src = file.url;
+        if (!src) {
+            src = await new Promise(resolve => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file.originFileObj);
+                reader.onload = () => resolve(reader.result);
+            });
+        }
+        if (!file.url && !file.preview) {
+            file.preview = await getBase64(file.originFileObj);
+        }
+        setPreviewImage(file.url || file.preview);
+        setPreviewOpen(true);
+    };
+    const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
+    const uploadButton = (
+        <button style={{ border: 0, background: 'none' }} type="button">
+            <PlusOutlined />
+            <div style={{ marginTop: 8 }}>Upload</div>
+        </button>
+    );
+
     return <Drawer open={props.rightMenu} onClose={props.tRightMenu} closable={false} destroyOnHidden={true} mask={{ blur: false }} placement="right"
         size={'20vw'} title="设置" footer={null}
         styles={{
@@ -144,7 +237,31 @@ export default function RightMenu(props) {
                     type="inner"
                     title="个人信息"
                 >
-                    <Avatar style={{ marginBottom: '8px' }} shape="square" size={64} src={<img draggable={false} src={"https://www.wled.top/images/Oz-Vessalius-avatar.svg"} />} />
+                    <ImgCrop rotationSlider>
+                        <Upload
+                            beforeUpload={file => {
+                                setFile(file);
+                                return false;
+                            }}
+                            listType="picture-card"
+                            fileList={fileList}
+                            onPreview={handlePreview}
+                            onChange={handleChange}
+                        >
+                            {fileList.length >= 1 ? null : uploadButton}
+                        </Upload>
+                    </ImgCrop>
+                    {previewImage && (
+                        <Image
+                            styles={{ root: { display: 'none' } }}
+                            preview={{
+                                open: previewOpen,
+                                onOpenChange: visible => setPreviewOpen(visible),
+                                afterOpenChange: visible => !visible && setPreviewImage(''),
+                            }}
+                            src={previewImage}
+                        />
+                    )}
                     <div className={s.cardTitle}><Text className={s.cardTitle} strong>用户Id：</Text>{userInfo.id || id}</div>
                     {userInfo.account && <div className={s.cardTitle}><Text className={s.cardTitle} strong>用户名：</Text> {userInfo.account}</div>}
                     <div className={s.cardTitle}><Text className={s.cardTitle} strong>用户角色：</Text> {userInfo.userGroup || role}</div>

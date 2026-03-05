@@ -1,7 +1,10 @@
 import axios from 'axios';
 
+// 由于资源文件同时在一个后端服务器下，所以暴露baseURL，方便后续直接反代
+export const baseURL = '/api';
+
 const service = axios.create({
-    baseURL: '/api',
+    baseURL,
     timeout: 10000,
 });
 

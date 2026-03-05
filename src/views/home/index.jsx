@@ -150,7 +150,6 @@ export default function home() {
                                 <Typography.Text className={s.cardGary} style={{ width: '100%' }} >总订单数</Typography.Text>
                                 <Statistic
                                     precision={0}
-                                    suffix="单"
                                     formatter={() => <CountUp end={allOrders} separator="," />}
                                     styles={{ content: { fontSize: '32px', fontWeight: 'bold', color: 'var(--textColor)' } }}
                                     style={{ marginBottom: "22px" }}
