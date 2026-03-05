@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { timeToDate } from '../../utils/time';
 import dayjs from 'dayjs'; // TODO:由于antd日期组件依赖dayjs处理日期，这里也引入dayjs以避免报错
 import { getStoreApi, /*TODO:会把服务器改炸的editStoreApi*/ } from '../../api/storeApi';
-import { App, Button, Card, Flex, Table, Modal, Form, Input, DatePicker, Pagination, Divider, Descriptions, Select, Typography, Avatar, Carousel, InputNumber, Upload } from 'antd';
+import { App, Button, Card, Flex, Table, Modal, Form, Input, DatePicker, Pagination, Divider, Descriptions, Typography, Avatar, Carousel, InputNumber, Upload } from 'antd';
+import { baseURL } from '../../utils/service';
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
 import s from '../../styles/layout.module.scss'
@@ -157,7 +158,7 @@ export default function store() {
     const dataSource = tableData.map((item) => ({
         key: item.id,
         name: item.name,
-        avatar: <Avatar shape="square" src={item.avatar} alt="avatar" size="large" draggable={false} />,
+        avatar: <Avatar shape="square" src={`${baseURL}${item.avatar}`} alt="avatar" size="large" draggable={false} />,
         score: item.score,
         sellCount: item.sellCount,
         date: item.date,

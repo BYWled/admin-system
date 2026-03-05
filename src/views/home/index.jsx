@@ -104,21 +104,18 @@ export default function home() {
         // 设置问候语
         const nowTime = (Temporal.Now.plainDateTimeISO().hour / 6);
         if (nowTime || nowTime === 0) {
-            switch (nowTime.toFixed(0)) {
-                case '0':
+            switch (Math.floor(nowTime)) {
+                case 0:
                     setSalutation('夜深了，注意休息🌙');
                     break;
-                case '1':
+                case 1:
                     setSalutation('上午好，新的一天开始了(*^▽^*)');
                     break;
-                case '2':
+                case 2:
                     setSalutation('下午好，就快下班了💪');
                     break;
-                case '3':
+                case 3:
                     setSalutation('晚上好，一天的工作结束了🌟');
-                    break;
-                case '4':
-                    setSalutation('该睡觉啦，晚安😴');
                     break;
             }
         }

@@ -3,6 +3,7 @@ import { App, Form, Flex, Card, Button, Input, Popconfirm, Table, Typography, Mo
 import { getGoodsApi, addGoodsApi, editGoodsApi, deleteGoodsApi, getCategoryApi } from '../../api/goodsApi';
 import { timeToDate, numToTime } from '../../utils/time';
 import { FilterOutlined } from '@ant-design/icons';
+import { baseURL } from '../../utils/service';
 import s from '../../styles/layout.module.scss'
 
 export default function goods() {
@@ -236,7 +237,7 @@ export default function goods() {
             title: '商品图',
             dataIndex: 'imgUrl',
             editable: true,
-            render: (imgUrl) => <Avatar shape="square" src={imgUrl} alt="avatar" size="large" draggable={false} />
+            render: (imgUrl) => <Avatar shape="square" src={`${baseURL}${imgUrl}`} alt="avatar" size="large" draggable={false} />
         },
         {
             title: '商品描述',
@@ -455,7 +456,7 @@ export default function goods() {
                     {
                         key: '0',
                         label: '商品图片',
-                        children: <Avatar shape="square" src={rowInfo.imgUrl} alt="avatar" size="large" draggable={false} />,
+                        children: <Avatar shape="square" src={`${baseURL}${rowInfo.imgUrl}`} alt="avatar" size="large" draggable={false} />,
                     },
                     {
                         key: '1',
@@ -501,7 +502,7 @@ export default function goods() {
                     {rowInfo.ratings && rowInfo.ratings.length > 0 ? rowInfo.ratings.map((item, index) => (
                         <>
                             <Flex justify="between" align="center" gap="small" style={{ width: '100%' }} >
-                                <Avatar src={item.avatar} alt="avatar" size="large" draggable={false} />
+                                <Avatar src={`${baseURL}${item.avatar}`} alt="avatar" size="large" draggable={false} />
                                 <Flex gap="large">
                                     <Typography.Text className={s.cardTitle} strong>{item.username}</Typography.Text>
                                     <Typography.Text className={s.cardGary} style={{ flex: 1 }}>{numToTime(item.rateTime)}</Typography.Text>

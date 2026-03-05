@@ -4,6 +4,7 @@ import { getUserApi, addUserApi, deleteUserApi, batchDeleteUserApi, editUserApi 
 import { timeToDate } from '../../utils/time';
 import { App, Avatar, Button, Card, Flex, Table, Modal, Form, Input, Select, Popconfirm, Pagination } from 'antd'
 import { UserOutlined, LockOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { baseURL } from '../../utils/service';
 import s from '../../styles/layout.module.scss'
 import VCode from '../../utils/verifyCode';
 
@@ -176,7 +177,7 @@ export default function User() {
     const dataSource = tableData.map((item) => ({
         key: item.id,
         id: item.id,
-        avatar: <Avatar shape="square" src={item.imgUrl} alt="avatar" size="large" draggable={false} />,
+        avatar: <Avatar shape="square" src={`${baseURL}${item.imgUrl}`} alt="avatar" size="large" draggable={false} />,
         name: item.account,
         group: item.userGroup,
         time: timeToDate(item.ctime),
