@@ -42,6 +42,11 @@
     background-color: color-mix(in srgb, var(--backColor) 80%, #eee);
     color: var(--textColor);
     padding: 20px;
+    overflow: scroll;
+    /* 隐藏 IE/Edge 滚动条 */
+    -ms-overflow-style: none;
+    /* 隐藏 Firefox 滚动条 */
+    scrollbar-width: none;
 }
 
 .layoutFooter {

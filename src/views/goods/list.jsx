@@ -110,8 +110,8 @@ export default function goods() {
     const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
     const uploadButton = (
         <button style={{ border: 0, background: 'none' }} type="button">
-            <PlusOutlined />
-            <div style={{ marginTop: 8 }}>Upload</div>
+            <PlusOutlined className={s.cardTitle} /><br />
+            <Typography.Text className={s.cardTitle} style={{ marginTop: 8 }}>上传</Typography.Text>
         </button>
     );
 

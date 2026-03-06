@@ -1,74 +1,221 @@
 import { useEffect, useState } from 'react'
-import { timeToDate } from '../../utils/time';
 import dayjs from 'dayjs'; // TODO:由于antd日期组件依赖dayjs处理日期，这里也引入dayjs以避免报错
-import { getStoreApi, /*TODO:会把服务器改炸的editStoreApi*/ } from '../../api/storeApi';
-import { App, Button, Card, Flex, Table, Modal, Form, Input, DatePicker, Pagination, Divider, Descriptions, Typography, Avatar, Carousel, InputNumber, Upload } from 'antd';
+import { getStoreApi, uploadStoreImageApi, editStoreApi } from '../../api/storeApi';
+import { EditOutlined, ArrowLeftOutlined, PlusOutlined } from '@ant-design/icons';
+import { App, Button, Card, Flex, Form, Input, DatePicker, Divider, Descriptions, Typography, Avatar, InputNumber, Upload, Spin, Image } from 'antd';
 import { baseURL } from '../../utils/service';
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
+const { Text } = Typography;
 import s from '../../styles/layout.module.scss'
+import ImgCrop from 'antd-img-crop';
+
+// 将文件转换为Base64格式，供图片预览使用
+const getBase64 = file =>
+    new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
 
 export default function store() {
-    const [pageSize, setPageSize] = useState(10);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [total, setTotal] = useState(0);
-    const [tableData, setTableData] = useState([]);
+    // ******************初始化变量、Hooks******************
+    const [tableData, setTableData] = useState({});
     const [pageLoading, setPageLoading] = useState(false);
     const [confirmLoading, setConfirmLoading] = useState(false); // 通用确认加载状态，一般仅有一个弹窗
-    const [editDia, setEditDia] = useState(false);
+    const [editMod, setEditMod] = useState(false);
     const [editForm, setEditForm] = useState({});
-    const [infoDia, setInfoDia] = useState(false);
-    const [rowInfo, setRowInfo] = useState({});
     const { message } = App.useApp();
     const [form] = Form.useForm();
 
-    // 表单提交按钮
-    const SubmitButton = ({ form, children, loading }) => {
-        const [submittable, setSubmittable] = useState(false);
-        // Watch all values
-        const values = Form.useWatch([], form);
-        useEffect(() => {
-            form
-                .validateFields({ validateOnly: true })
-                .then(() => setSubmittable(true))
-                .catch(() => setSubmittable(false));
-        }, [form, values]);
-        return (
-            <Button type="primary" htmlType="submit" disabled={!submittable} loading={loading}>
-                {children}
-            </Button>
-        );
+    // 头像上传
+    const [avatarFile, setAvatarFile] = useState(null);
+    const [avatarFileList, setAvatarFileList] = useState([]);
+    const [avatarFileUrl, setAvatarFileUrl] = useState(null);
+
+    // 图片集上传
+    const [picsFileList, setPicsFileList] = useState([]);
+    const [picsUrlMap, setPicsUrlMap] = useState({}); // uid -> filename
+
+    // 共用预览
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const [previewImage, setPreviewImage] = useState('');
+
+    const uploadButton = (
+        <button style={{ border: 0, background: 'none' }} type="button">
+            <PlusOutlined className={s.cardTitle} /><br />
+            <Text className={s.cardTitle} style={{ marginTop: 8 }}>上传</Text>
+        </button>
+    );
+
+    // 清除图片缓存
+    const clearFileCache = () => {
+        setAvatarFile(null);
+        setAvatarFileList([]);
+        setAvatarFileUrl(null);
+        setPicsFileList([]);
+        setPicsUrlMap({});
+        setPreviewImage('');
+    };
+
+    // 图片预览
+    const handlePreview = async (file) => {
+        if (!file.url && !file.preview) {
+            file.preview = await getBase64(file.originFileObj);
+        }
+        setPreviewImage(file.url || file.preview);
+        setPreviewOpen(true);
+    };
+
+    // 头像上传监听
+    useEffect(() => {
+        if (!avatarFile) return;
+        const upload = async () => {
+            try {
+                const formData = new FormData();
+                formData.append('file', avatarFile);
+                const res = await uploadStoreImageApi(formData);
+                if (res.code) {
+                    message.error(`上传头像失败: ${res.msg}`);
+                    setAvatarFileList(prev => prev.map(f => ({ ...f, status: 'error' })));
+                    return;
+                }
+                const filename = res.imgUrl ? res.imgUrl.split('/').pop() : res.imgUrl;
+                setAvatarFileUrl(filename);
+            } catch (e) {
+                setAvatarFileList(prev => prev.map(f => ({ ...f, status: 'error' })));
+                message.error('上传头像失败');
+            }
+        };
+        upload();
+    }, [avatarFile]);
+
+    // 头像变化
+    const handleAvatarChange = ({ fileList: newFileList }) => setAvatarFileList(newFileList);
+
+    // 图片集变化（处理删除）
+    const handlePicsChange = ({ file, fileList: newFileList }) => {
+        setPicsFileList(newFileList);
+        if (file.status === 'removed') {
+            setPicsUrlMap(prev => {
+                const next = { ...prev };
+                delete next[file.uid];
+                return next;
+            });
+        }
     };
 
     // =========== 获取店铺信息 ==============
     const getTableData = async () => {
         setPageLoading(true);
-        const res = await getStoreApi({
-            page: currentPage,
-            size: pageSize
-        });
+        const res = await getStoreApi();
         if (res.code) {
-            setTableData([]);
-            setTotal(0);
+            setTableData({});
             setPageLoading(false);
             return message.error('获取店铺信息失败');
         }
-        setTableData(Array.isArray(res.data) ? res.data : [res.data]); // 兼容后端单条数据直接返回对象的情况
-        setTotal(Array.isArray(res.data) ? res.data.length : 1); // TODO: 后端接口需要返回总条数以支持分页，这里暂时用当前数据长度代替
+        // 时间预处理
+        const showDate = res.data.date?.map((item) => item.split(' ').pop());
+        // 公告预处理
+        const showBulletin = res.data.bulletin.split('\r\n');
+        // 图片预处理
+        const pics = res.data.pics?.map((url) => baseURL + url); // 后续不作用，破坏性修改
+        setTableData({ ...res.data, showDate, showBulletin, pics });
         setPageLoading(false);
         setConfirmLoading(false);
     }
 
     useEffect(() => {
         getTableData();
-    }, [pageSize, currentPage]);
+    }, []); // TODO:首屏渲染之后才执行
+
+    // ============ 预览部分 ==============
+    const tableItems = [
+        {
+            label: '头像',
+            children: <Avatar shape="square" size='large' src={baseURL + tableData.avatar} />,
+        },
+        {
+            label: '名称',
+            children: <Text className={s.cardTitle}>{tableData.name}</Text>,
+        },
+        {
+            label: '评分',
+            children: <><Text className={s.cardTitle} strong>{tableData.score}</Text><Text className={s.cardTitle}> / 5</Text></>,
+        },
+        {
+            label: '销量',
+            children: <Text className={s.cardTitle}>{tableData.sellCount}</Text>,
+        },
+        {
+            label: '营业时间',
+            children: <Text className={s.cardTitle}>{tableData.showDate ? tableData.showDate.join(' ~ ') : '暂未设置'}</Text>,
+        },
+        {
+            label: '配送时间',
+            children: <Text className={s.cardTitle}>{tableData.deliveryTime} 分钟</Text>,
+        },
+        {
+            label: '起送',
+            children: <Text className={s.cardTitle}>￥ {tableData.minPrice}</Text>,
+        },
+        {
+            label: '配送',
+            children: <Text className={s.cardTitle} strong>￥ {tableData.deliveryPrice}</Text>,
+        },
+        {
+            label: '描述',
+            span: 2,
+            children: <Text className={s.cardTitle}>{tableData.description}</Text>,
+        },
+        {
+            label: '活动',
+            span: 2,
+            children: tableData.supports?.map((e, index) => { // TODO:加?确保在首次渲染时不会因为supports未定义而报错
+                return (<div key={index}>
+                    <Text className={s.cardTitle}>{e}</Text>
+                    <br />
+                </div>
+                )
+            })
+        },
+        {
+            label: '公告',
+            span: 4,
+            children: tableData.showBulletin?.map((e, index) => {
+                return (<div key={index}>
+                    <Text className={s.cardTitle}>{e}</Text>
+                    <br />
+                </div>
+                )
+            })
+        },
+        {
+            label: '图片',
+            span: 4,
+            children: <Flex gap='small' wrap>
+                {
+                    tableData.pics ? tableData.pics.map((url, index) => (
+                        <Image
+                            src={url}
+                            alt={`店铺图片${index + 1}`}
+                            preview={false}
+                            style={{ height: '20vh', objectFit: 'contain' }}
+                        />
+                    )) : null
+                }
+            </Flex>
+        }
+    ];
 
     // ============ 编辑店铺 ==============
     const openEdit = (item) => {
-        setEditDia(true);
+        clearFileCache();
+        setEditMod(true);
         // 处理日期范围
         const dateRange = (item.date && item.date.length === 2)
-            ? [dayjs(timeToDate(item.date[0])), dayjs(timeToDate(item.date[1]))]
+            ? [dayjs(item.date[0]), dayjs(item.date[1])]
             : null;
 
         // 处理数组字段：将字符串数组转为文本
@@ -76,11 +223,40 @@ export default function store() {
             ? item.supports.join('\n')
             : '';
 
+        // 初始化头像
+        if (item.avatar) {
+            const avatarFilename = item.avatar.split('/').pop();
+            setAvatarFileList([{
+                uid: '-1',
+                name: avatarFilename,
+                status: 'done',
+                url: baseURL + item.avatar,
+            }]);
+            setAvatarFileUrl(avatarFilename);
+        }
+
+        // 初始化图片集
+        if (item.pics && item.pics.length > 0) {
+            const urlMap = {};
+            const fileList = item.pics.map((url, i) => {
+                const filename = url.split('/').pop();
+                const uid = `existing-${i}`;
+                urlMap[uid] = filename;
+                return {
+                    uid,
+                    name: filename,
+                    status: 'done',
+                    url: url, // pics已拼接baseURL
+                };
+            });
+            setPicsFileList(fileList);
+            setPicsUrlMap(urlMap);
+        }
+
         setEditForm({
             ...item,
             date: dateRange,
             supports: supportsText,
-            pics: '' // 图片禁用，设为空
         })
     }
     const editStore = async (values) => {
@@ -89,34 +265,40 @@ export default function store() {
 
             // 处理日期范围：转换为字符串数组的JSON格式
             const dateArray = values.date && values.date.length === 2
-                ? '[' + [values.date[0].format('YYYY-MM-DD HH:mm:ss'), values.date[1].format('YYYY-MM-DD HH:mm:ss')].join(', ') + ']'
+                ? JSON.stringify([values.date[0].format('YYYY-MM-DD HH:mm:ss'), values.date[1].format('YYYY-MM-DD HH:mm:ss')])
                 : '[]';
 
             // 处理活动字段：将每行文本转为字符串数组的JSON格式
-            const supportsArray = values.supports
-                ? '[' + [values.supports.split('\n').filter(s => s.trim()).map(s => `${s.trim()}`)].join(', ') + ']'
-                : '[]';
+            const supportsArray = JSON.stringify(
+                values.supports
+                    ? values.supports.split('\n').map(line => line.trim()).filter(line => line)
+                    : []
+            );
 
-            // 处理图片字段：转为字符串数组的JSON格式（虽然禁用，但需要保持格式）
-            const picsArray = values.pics
-                ? `[${values.pics.split('\n').filter(s => s.trim()).map(s => `"${s.trim()}"`).join(',')}]`
-                : '[]';
+            // 处理头像：使用上传后的文件名，若未修改则保留原值
+            const avatarValue = avatarFileUrl || editForm.avatar?.split('/').pop() || '';
+
+            // 处理图片集：从 picsUrlMap 中按 fileList 顺序提取文件名，保存为JSON字符串数组
+            const picsArray = JSON.stringify(
+                picsFileList.map(f => picsUrlMap[f.uid]).filter(Boolean)
+            );
 
             // 修改信息
             const res = await editStoreApi({
                 id: editForm.id,
                 name: values.name,
-                avatar: editForm.avatar,
                 bulletin: values.bulletin,
-                description: values.description,
-                date: dateArray,
-                deliveryTime: values.deliveryTime,
+                avatar: avatarValue,
                 deliveryPrice: values.deliveryPrice,
+                deliveryTime: values.deliveryTime,
+                description: values.description,
                 score: values.score,
                 sellCount: values.sellCount,
                 supports: supportsArray,
+                date: dateArray,
                 pics: picsArray
             });
+
             if (res.code) {
                 setConfirmLoading(false);
                 message.error(`修改店铺信息失败: ${res.msg}`);
@@ -124,9 +306,10 @@ export default function store() {
             }
             setEditForm({});
             form.resetFields(); // 重置表单
+            clearFileCache(); // 清除图片缓存
             getTableData();
             setConfirmLoading(false);
-            setEditDia(false);
+            setEditMod(false);
             message.success('店铺信息已更新');
         } catch (error) {
             setConfirmLoading(false);
@@ -134,339 +317,164 @@ export default function store() {
         }
     }
 
-    // =========== 查看详情 ==============
-    const info = (record) => {
-        setRowInfo({ ...record, date: (record.date && record.date.length === 2) ? `${timeToDate(record.date[0])} - ${timeToDate(record.date[1])}` : '-' });
-        setInfoDia(true);
-    }
-
-    const closeInfo = () => {
-        setRowInfo({});
-        setInfoDia(false);
-    }
-
-    // ============= 表格相关 ==============
-    const columns = [
-        { title: '店铺名', dataIndex: 'name' },
-        { title: '店铺头像', dataIndex: 'avatar' },
-        { title: '评分', dataIndex: 'score' },
-        { title: '销量', dataIndex: 'sellCount' },
-        { title: '描述', dataIndex: 'description' },
-        { title: '营业时间', dataIndex: 'date' },
-        { title: '操作', dataIndex: 'action', fixed: 'end', width: 180 }
-    ];
-    const dataSource = tableData.map((item) => ({
-        key: item.id,
-        name: item.name,
-        avatar: <Avatar shape="square" src={`${baseURL}${item.avatar}`} alt="avatar" size="large" draggable={false} />,
-        score: item.score,
-        sellCount: item.sellCount,
-        date: item.date,
-        description: <Typography.Paragraph className={s.cardTitle} ellipsis={{ tooltip: item.description, rows: 1 }} style={{ maxWidth: 200, margin: 0 }}>{item.description}</Typography.Paragraph>,
-        action: (
-            <Flex gap="small">
-                <Button variant="solid" onClick={() => info(item)}>详情</Button>
-                <Button color="primary" variant="solid" onClick={() => openEdit(item)}>编辑</Button>
-            </Flex>
-        )
-    }));
-
     return (
-        <Card classNames={{ root: s.cardRoot, header: s.cardHeader, title: s.cardTitle }} variant="borderless" style={{ width: '100%' }} >
-            <Flex vertical justify="center" align="center" style={{ width: '100%' }} gap="small" >
-                <Table classNames={{ root: s.tableRoot, header: { cell: s.tableHeader }, body: { cell: s.tableBody } }} columns={columns} dataSource={dataSource} loading={pageLoading} scroll={{ y: 55 * 8, x: 'max-content' }} pagination={false} />
-                {/* 分页 */}
-                <Flex justify="center" align="center" style={{ width: '100%' }} >
-                    <Pagination
-                        total={total}
-                        showTotal={total => `共显示 ${total} 条`}
-                        pageSize={pageSize}
-                        current={currentPage}
-                        showSizeChanger
-                        pageSizeOptions={['10', '20', '50']}
-                        showQuickJumper
-                        onChange={(page, size) => {
-                            setCurrentPage(page);
-                            setPageSize(size);
-                        }}
-                        onShowSizeChange={(current, size) => {
-                            setCurrentPage(1);
-                            setPageSize(size);
-                        }}
-                        classNames={{
-                            item: s.paginationItem
-                        }}
-                        className={s.pagination}
-                    />
-                </Flex>
-            </Flex>
-            {/* 详情 */}
-            < Modal
-                title="店铺详情"
-                open={infoDia}
-                footer={null}
-                onCancel={closeInfo}
-                destroyOnHidden={true}
-                width={600}
-                centered
-                mask={{ blur: false }}
-                classNames={{
-                    container: s.modalContainer,
-                    header: s.modalHeader,
-                    title: s.modalTitle,
-                    body: s.modalBody,
-                    footer: s.modalFooter
-                }}
-            >
-                <Flex direction="column" wrap gap="medium" >
-                    <Divider classNames={{ root: s.dividerRoot, rail: s.divider, content: s.divider }} orientation="left">基本信息</Divider>
-                    <Descriptions labelStyle={{ width: '20%' }} classNames={{ root: s.descRoot, label: s.descLabel, content: s.descContent }} column={2} style={{ width: '100%' }} size='small' bordered items={[
-                        {
-                            key: '1',
-                            label: '店铺ID',
-                            children: rowInfo.id,
-                        },
-                        {
-                            key: '2',
-                            label: '店铺名称',
-                            children: rowInfo.name,
-                        },
-                        {
-                            key: '3',
-                            label: '店铺头像',
-                            span: 2,
-                            children: <Avatar shape="square" src={rowInfo.avatar} alt="avatar" size="large" draggable={false} />,
-                        },
-                        {
-                            key: '4',
-                            label: '公告',
-                            span: 2,
-                            children: rowInfo.bulletin,
-                        },
-                        {
-                            key: '5',
-                            label: '描述',
-                            span: 2,
-                            children: rowInfo.description,
-                        },
-                        {
-                            key: '6',
-                            label: '营业时间',
-                            children: rowInfo.date,
-                        },
-                        {
-                            key: '7',
-                            label: '起送价',
-                            children: '￥' + rowInfo.minPrice,
-                        },
-                        {
-                            key: '8',
-                            label: '配送时间',
-                            children: rowInfo.deliveryTime + ' 分钟',
-                        },
-                        {
-                            key: '9',
-                            label: '配送费',
-                            children: '￥' + rowInfo.deliveryPrice,
-                        },
-                    ]} />
-                    <Divider classNames={{ root: s.dividerRoot, rail: s.divider, content: s.divider }} orientation="left">运营信息</Divider>
-                    <Descriptions classNames={{ root: s.descRoot, label: s.descLabel, content: s.descContent }} column={2} style={{ width: '100%' }} bordered items={[
-                        {
-                            key: '1',
-                            label: '评分',
-                            children: rowInfo.rating,
-                        },
-                        {
-                            key: '2',
-                            label: '销量',
-                            children: rowInfo.sellCount,
-                        },
-                        {
-                            key: '3',
-                            label: '活动',
-                            span: 2,
-                            children: <div>{rowInfo.supports && rowInfo.supports.length > 0 ? rowInfo.supports.map((act, index) => (
-                                <><Typography.Text className={s.cardTitle} key={index}>{index + 1}：{act}</Typography.Text><br /></>
-                            )) : '无活动'}</div>
-                        },
-                        {
-                            key: '4',
-                            label: '店铺图片',
-                            span: 2,
-                            children: <Carousel autoplay>
-                                {rowInfo.pics && rowInfo.pics.length > 0 ? rowInfo.pics.map((img, index) => (
-                                    <div key={index}>
-                                        <img src={img} alt={`store-img-${index}`} style={{ width: '100%', maxHeight: '230px', objectFit: 'cover' }} draggable={false} />
-                                    </div>
-                                )) : <Typography.Text className={s.cardTitle}> 无店铺图片 </Typography.Text>
-                                }
-                            </Carousel>,
-                        }
-                    ]} />
-                </Flex>
-            </Modal >
-            {/* 编辑 */}
-            < Modal
-                title="编辑店铺"
-                width={800}
-                open={editDia}
-                footer={null}
-                onCancel={() => setEditDia(false)}
-                destroyOnHidden={true}
-                mask={{ blur: false }}
-                centered
-                classNames={{
-                    container: s.modalContainer,
-                    header: s.modalHeader,
-                    title: s.modalTitle,
-                    body: s.modalBody,
-                    footer: s.modalFooter
-                }}
-            >
-                <Form
-                    form={form}
-                    name="editForm"
-                    onFinish={editStore}
-                    layout="vertical"
-                    autoComplete="off"
-                    clearOnDestroy={true}
-                    style={{ padding: '10px', width: '100%' }}
-                    classNames={{
-                        label: s.formLabel
-                    }}
-                >
-                    <Flex justify="space-between" align="center" wrap style={{ width: '100%' }} >
-                        <Form.Item
-                            label="店铺ID"
-                            style={{ width: '23%' }}
-                        >
-                            <Input className={s.input} value={editForm.id} disabled />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="店铺名称"
-                            name="name"
-                            initialValue={editForm.name}
-                            style={{ width: '23%' }}
-                            rules={[{ required: true, message: '请输入店铺名称!' }]}
-                        >
-                            <Input className={s.input} allowClear placeholder="请输入店铺名称" />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="店铺头像"
-                            name="avatar"
-                            style={{ width: '23%' }}
-                        >
-                            <Input className={s.input} disabled placeholder="图片上传功能未启用" />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="店铺图片"
-                            name="pics"
-                            style={{ width: '23%' }}
-                        >
-                            <Input className={s.input} disabled placeholder="图片上传功能未启用" />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="配送时间（分钟）"
-                            name="deliveryTime"
-                            initialValue={editForm.deliveryTime}
-                            style={{ width: '23%' }}
-                            rules={[{ required: true, message: '请输入配送时间!' }]}
-                        >
-                            <InputNumber className={s.input} placeholder="请输入配送时间" min={0} style={{ width: '100%' }} />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="配送费"
-                            name="deliveryPrice"
-                            initialValue={editForm.deliveryPrice}
-                            style={{ width: '23%' }}
-                            rules={[{ required: true, message: '请输入配送费!' }]}
-                        >
-                            <InputNumber className={s.input} placeholder="请输入配送费" min={0} precision={2} style={{ width: '100%' }} />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="评分"
-                            name="score"
-                            initialValue={editForm.score}
-                            style={{ width: '23%' }}
-                            rules={[{ required: true, message: '请输入评分!' }]}
-                        >
-                            <InputNumber className={s.input} placeholder="请输入评分" min={0} max={5} precision={1} style={{ width: '100%' }} />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="销量"
-                            name="sellCount"
-                            initialValue={editForm.sellCount}
-                            style={{ width: '23%' }}
-                            rules={[{ required: true, message: '请输入销量!' }]}
-                        >
-                            <InputNumber className={s.input} placeholder="请输入销量" min={0} style={{ width: '100%' }} />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="公告"
-                            name="bulletin"
-                            initialValue={editForm.bulletin}
-                            style={{ width: '48%' }}
-                            rules={[{ required: true, message: '请输入公告!' }]}
-                        >
-                            <TextArea className={s.input} allowClear placeholder="请输入公告" rows={2} />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="描述"
-                            name="description"
-                            initialValue={editForm.description}
-                            style={{ width: '48%' }}
-                            rules={[{ required: true, message: '请输入描述!' }]}
-                        >
-                            <TextArea className={s.input} allowClear placeholder="请输入描述" rows={2} />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="营业时间"
-                            name="date"
-                            initialValue={editForm.date}
-                            style={{ width: '48%' }}
-                            rules={[{ required: true, message: '请选择营业时间!' }]}
-                        >
-                            <RangePicker
-                                size="large"
-                                showTime
-                                placeholder={['开始时间', '结束时间']}
-                                format={{
-                                    format: 'YYYY-MM-DD HH:mm:ss',
-                                    type: 'mask',
-                                }}
+        <Card classNames={{ root: s.cardRoot, header: s.cardHeader, title: s.cardTitle }} variant="borderless" style={{ width: '100%' }}>
+            {
+                editMod ?
+                    (
+                        // 编辑部分
+                        <Flex vertical justify="center" align="center" style={{ width: '100%' }} gap="small" >
+                            <Form
+                                form={form}
+                                name="editStore"
+                                layout='vertical'
                                 style={{ width: '100%' }}
+                                initialValues={editForm}
+                                onFinish={editStore}
+                                autoComplete="off"
+                                classNames={{
+                                    label: s.formLabel
+                                }}
+                            >
+                                {/* ========== 图片上传区 ========== */}
+                                {/* TODO: 使用flex 0 0 自动可以固定组件大小，更好的做列表布局 */}
+                                <Divider classNames={{ root: s.dividerRoot, rail: s.divider, content: s.divider }}>图片管理</Divider>
+                                <Flex gap="large" wrap>
+                                    <div style={{ flex: '0 0 auto' }}>
+                                        <Text className={s.cardTitle} style={{ marginBottom: '8px', fontWeight: 500 }}>头像</Text>
+                                        <ImgCrop rotationSlider>
+                                            <Upload
+                                                beforeUpload={file => {
+                                                    setAvatarFile(file);
+                                                    return false;
+                                                }}
+                                                listType="picture-card"
+                                                fileList={avatarFileList}
+                                                onPreview={handlePreview}
+                                                onChange={handleAvatarChange}
+                                            >
+                                                {avatarFileList.length >= 1 ? null : uploadButton}
+                                            </Upload>
+                                        </ImgCrop>
+                                    </div>
+                                    <div style={{ flex: '1 1 auto', minWidth: '300px' }}>
+                                        <Text className={s.cardTitle} style={{ marginBottom: '8px', fontWeight: 500 }}>图片集</Text>
+                                        <ImgCrop rotationSlider>
+                                            <Upload
+                                                beforeUpload={file => {
+                                                    const uploadFile = async () => {
+                                                        try {
+                                                            const formData = new FormData();
+                                                            formData.append('file', file);
+                                                            const res = await uploadStoreImageApi(formData);
+                                                            if (res.code) {
+                                                                message.error(`上传图片失败: ${res.msg}`);
+                                                                return;
+                                                            }
+                                                            const filename = res.imgUrl ? res.imgUrl.split('/').pop() : res.imgUrl;
+                                                            setPicsUrlMap(prev => ({ ...prev, [file.uid]: filename }));
+                                                        } catch (e) {
+                                                            message.error('上传图片失败');
+                                                        }
+                                                    };
+                                                    uploadFile();
+                                                    return false;
+                                                }}
+                                                listType="picture-card"
+                                                fileList={picsFileList}
+                                                onPreview={handlePreview}
+                                                onChange={handlePicsChange}
+                                            >
+                                                {uploadButton}
+                                            </Upload>
+                                        </ImgCrop>
+                                        {previewImage && (
+                                            <Image
+                                                styles={{ root: { display: 'none' } }}
+                                                preview={{
+                                                    open: previewOpen,
+                                                    onOpenChange: visible => setPreviewOpen(visible),
+                                                    afterOpenChange: visible => !visible && setPreviewImage(''),
+                                                }}
+                                                src={previewImage}
+                                            />
+                                        )}
+                                    </div>
+                                </Flex>
+
+                                {/* ========== 基础信息区 ========== */}
+                                <Divider classNames={{ root: s.dividerRoot, rail: s.divider, content: s.divider }}>基础信息</Divider>
+                                <Flex gap="middle" wrap>
+                                    <Form.Item label="名称" name="name" rules={[{ required: true, message: '请输入店铺名称!' }]} style={{ flex: '0 0 calc(33% - 12px)' }}>
+                                        <Input className={s.input} placeholder="请输入店铺名称" />
+                                    </Form.Item>
+                                    <Form.Item label="评分" name="score" rules={[{ required: true, message: '请输入店铺评分!' }]} style={{ flex: '0 0 calc(33% - 12px)' }}>
+                                        <InputNumber className={s.input} min={0} max={5} step={0.1} style={{ width: '100%' }} />
+                                    </Form.Item>
+                                    <Form.Item label="销量" name="sellCount" rules={[{ required: true, message: '请输入店铺销量!' }]} style={{ flex: '0 0 calc(33% - 12px)' }}>
+                                        <InputNumber className={s.input} min={0} style={{ width: '100%' }} />
+                                    </Form.Item>
+                                </Flex>
+
+                                {/* ========== 营业时间 & 配送信息区 ========== */}
+                                <Divider >营业与配送</Divider>
+                                <Flex gap="middle" wrap>
+                                    <Form.Item label="营业时间" name="date" rules={[{ required: true, message: '请选择营业时间!' }]} style={{ flex: '0 0 calc(25% - 12px)' }}>
+                                        <RangePicker className={s.input} format={'HH:mm:ss'} showTime style={{ width: '100%' }} />
+                                    </Form.Item>
+                                    <Form.Item label="起送价" name="minPrice" rules={[{ required: true, message: '请输入起送价!' }]} style={{ flex: '0 0 calc(25% - 12px)' }}>
+                                        <InputNumber className={s.input} min={0} prefix="￥" style={{ width: '100%' }} />
+                                    </Form.Item>
+                                    <Form.Item label="配送费" name="deliveryPrice" rules={[{ required: true, message: '请输入配送费!' }]} style={{ flex: '0 0 calc(25% - 12px)' }}>
+                                        <InputNumber className={s.input} min={0} prefix="￥" style={{ width: '100%' }} />
+                                    </Form.Item>
+                                    <Form.Item label="配送时间" name="deliveryTime" rules={[{ required: true, message: '请输入配送时间!' }]} style={{ flex: '0 0 calc(25% - 12px)' }}>
+                                        <InputNumber className={s.input} min={0} suffix="分钟" controls={false} style={{ width: '100%' }} />
+                                    </Form.Item>
+                                </Flex>
+
+                                {/* ========== 文本信息区 ========== */}
+                                <Divider classNames={{ root: s.dividerRoot, rail: s.divider, content: s.divider }}>描述与公告</Divider>
+                                <Flex gap="middle" wrap>
+                                    <Form.Item label="描述" name="description" style={{ flex: '0 0 calc(33% - 12px)' }}>
+                                        <TextArea className={s.input} rows={5} placeholder="请输入店铺描述" />
+                                    </Form.Item>
+                                    <Form.Item label="活动" name="supports" style={{ flex: '0 0 calc(33% - 12px)' }}>
+                                        <TextArea className={s.input} rows={5} placeholder="每行一个活动" />
+                                    </Form.Item>
+                                    <Form.Item label="公告" name="bulletin" style={{ flex: '0 0 calc(33% - 12px)' }}>
+                                        <TextArea className={s.input} rows={5} placeholder="请输入店铺公告" />
+                                    </Form.Item>
+                                </Flex>
+
+                                <Flex justify="center" gap="large">
+                                    <Button className={s.cardRoot} color='lime' variant="outlined" onClick={() => { clearFileCache(); setEditMod(false); }} icon={<ArrowLeftOutlined />}>
+                                        返回预览
+                                    </Button>
+                                    <Button type="primary" htmlType="submit" loading={confirmLoading}>
+                                        保存修改
+                                    </Button>
+                                </Flex>
+                            </Form>
+                        </Flex>
+                    )
+                    : (
+                        // 预览部分
+                        <Spin spinning={pageLoading}>
+                            <Flex justify="end" align="center" style={{ width: '100%', marginBottom: '10px' }} gap="small" >
+                                <Button className={s.cardRoot} color="primary" variant="outlined" onClick={() => openEdit(tableData)} icon={<EditOutlined />}>
+                                    编辑店铺
+                                </Button>
+                            </Flex>
+                            <Descriptions
+                                classNames={{ root: s.descRoot, label: s.descLabel, content: s.descContent }}
+                                bordered
+                                column={4}
+                                items={tableItems}
                             />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="活动（每行一个）"
-                            name="supports"
-                            initialValue={editForm.supports}
-                            style={{ width: '48%' }}
-                            rules={[{ required: false }]}
-                        >
-                            <TextArea className={s.input} allowClear placeholder="每行输入一个活动，例如：\n玉米浓浓堡上心\n美团配送满25-5" rows={2} />
-                        </Form.Item>
-                    </Flex>
-
-                    <Flex justify="end" align="center" style={{ width: '100%' }} >
-                        <SubmitButton form={form} loading={confirmLoading}>
-                            编辑店铺
-                        </SubmitButton>
-                    </Flex>
-                </Form>
-            </Modal >
+                        </Spin>
+                    )
+            }
         </Card >
     )
 }

@@ -47,6 +47,12 @@ export default function LeftMenu(props) {
     }
   }, [props.collapsed]);
 
+  // 监听路由变化，更新选中状态
+  useEffect(() => {
+    setSelectedKeys([location.pathname]);
+    setSelectedOpenKeys([matches[0].pathname + 's']);
+  }, [location.pathname]);
+
   // ******************函数部分******************
   // 获取当前展开的菜单id
   const currentOpenId = () => {
@@ -101,6 +107,7 @@ export default function LeftMenu(props) {
         theme={props.darkMode ? 'dark' : 'light'}
         mode="inline"
         defaultSelectedKeys={selectedKeys}
+        selectedKeys={selectedKeys}
         defaultOpenKeys={selectedOpenKeys}
         onOpenChange={onOpenChange}
         openKeys={stateOpenKeys}

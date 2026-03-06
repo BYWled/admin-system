@@ -208,8 +208,8 @@ export default function RightMenu(props) {
     const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
     const uploadButton = (
         <button style={{ border: 0, background: 'none' }} type="button">
-            <PlusOutlined />
-            <div style={{ marginTop: 8 }}>Upload</div>
+            <PlusOutlined className={s.cardTitle} /><br />
+            <Text className={s.cardTitle} style={{ marginTop: 8 }}>上传</Text>
         </button>
     );
 
