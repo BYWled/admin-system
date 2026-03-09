@@ -22,7 +22,7 @@ export default function Login() {
     }, []);
 
     // 提交表单
-    const onFinish = async values => {
+    const onFinish = async (values: object) => {
         // 验证码验证
         if (inCaptcha.toLowerCase() !== captcha.toLowerCase()) {
             message.error('验证码错误');
@@ -30,7 +30,7 @@ export default function Login() {
             return;
         }
 
-        const res = await loginApi(values);
+        const res: any = await loginApi(values);
         if (res.code !== 0) {
             message.error({ content: res.msg || '登录失败，请稍后重试', });
             setFresh(fresh + 1);
@@ -53,7 +53,7 @@ export default function Login() {
                     theme={{
                         components: {
                             Form: {
-                                labelFontSize: '16px',
+                                labelFontSize: 16,
                             }
                         },
                         token: {
@@ -87,7 +87,7 @@ export default function Login() {
                             <Button htmlType="submit" ghost className={s.loginBtn} type="primary" size='large'>登录</Button>
                         </Form.Item>
                     </Form>
-                    <Divider classNames={{ root: s.dividerRoot, rail: s.divider, content: s.divider }}style={{ margin: '20px 0' }}>more</Divider>
+                    <Divider classNames={{ root: s.dividerRoot, rail: s.divider, content: s.divider }} style={{ margin: '20px 0' }}>more</Divider>
                 </ConfigProvider>
                 <Flex gap={20} justify="center">
                     <Avatar className='a' size={40} onClick={() => window.location.href = 'https://github.com/BYWled/admin-system'} src={<img draggable={false} src={GitHubLogo} alt="Github" />} />

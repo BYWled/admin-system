@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { userInfoApi, checkPassApi, changePassApi } from '../../api/userApi'
 import { changeAvatarApi, editUserAvatarApi } from '../../api/userListApi'
 import VCode from '../../utils/verifyCode'
@@ -21,6 +22,7 @@ export default function RightMenu(props) {
     // ******************初始化变量、Hooks******************
     const { Text } = Typography;
     const { message } = App.useApp();
+    const { navigate } = useNavigate();
     const [userInfo, setUserInfo] = useState({});
     const [lockDialogVisible, setLockDialogVisible] = useState(false);
     const [lockPassword, setLockPassword] = useState('');
@@ -65,6 +67,8 @@ export default function RightMenu(props) {
         } catch (e) {
             message.error('获取用户信息失败');
             console.error('获取用户信息失败:', e);
+            localStorage.removeItem('admin');
+            navigate('/login', { replace: true });
         }
     };
     useEffect(() => {
