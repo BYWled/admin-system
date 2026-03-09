@@ -187,7 +187,7 @@ export default function layout() {
                     }
                   }}
                     onClick={() => window.open('https://github.com/BYWled/admin-system', '_blank')}
-                    variant="link">admin-system Dev-01.30</Button>
+                    variant="link">admin-system Dev-03.09</Button>
                   <span>&nbsp;©2026 Created by&nbsp;</span>
                   <Button color={darkMode ? "geekblue" : "default"} styles={{
                     root: {

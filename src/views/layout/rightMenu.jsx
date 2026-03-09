@@ -41,7 +41,7 @@ export default function RightMenu(props) {
     const [fileList, setFileList] = useState([
         {
             uid: '-1',
-            name: 'image.png',
+            name: '头像',
             status: 'done',
             url: 'https://www.wled.top/images/Oz-Vessalius-avatar.svg',
         }
@@ -55,10 +55,10 @@ export default function RightMenu(props) {
             if (!res.accountInfo) message.error('用户信息不存在');
             setUserInfo(res.accountInfo);
             // 如果不是默认头像则设置上传组件的fileList以显示当前头像
-            if (res.accountInfo.imgUrl !== "/upload/imgs/acc_img/default.jpg") {
+            if (res.accountInfo.imgUrl !== "default.jpg") {
                 setFileList([{
                     uid: '-1',
-                    name: 'avatar.png',
+                    name: '头像',
                     status: 'done',
                     url: `${baseURL}${res.accountInfo.imgUrl}`
                 }]);
