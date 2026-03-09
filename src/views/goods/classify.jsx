@@ -261,7 +261,7 @@ export default function classify() {
                     columns={mergedColumns}
                     rowClassName="editable-row"
                     loading={pageLoading}
-                    scroll={{ y: 55 * 8, x: 'max-content' }}
+                    scroll={{ y: 55 * 12, x: 'max-content' }}
                     pagination={false} />
             </Form>
             <Flex justify="center" align="center" style={{ width: '100%' }} >

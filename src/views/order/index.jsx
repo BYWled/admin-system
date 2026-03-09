@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { timeToDate } from '../../utils/time';
+import { timeToDate, numToTime } from '../../utils/time';
 import dayjs from 'dayjs'; // TODO:由于antd日期组件依赖dayjs处理日期，这里也引入dayjs以避免报错
 import { getOrderApi, editOrderApi } from '../../api/orderApi';
 import { App, Button, Card, Flex, Table, Modal, Form, Input, DatePicker, Pagination, Divider, Descriptions, InputNumber, Select } from 'antd'
@@ -60,7 +60,7 @@ export default function order() {
             pageSize,
             currentPage,
             ...(emptyForm || formData),
-            date: emptyForm ? [] : JSON.stringify(formData.date)
+            date: emptyForm ? JSON.stringify([]) : JSON.stringify(formData.date)
         });
         if (res.code) {
             setTableData([]);
@@ -107,14 +107,14 @@ export default function order() {
             const res = await editOrderApi({
                 id: editForm.id,
                 orderNo: values.orderNo,
-                orderTime: values.orderTime,
+                orderTime: numToTime(values.orderTime.valueOf()), // TODO:日期组件返回的是dayjs对象，valueOf转换成时间戳
                 phone: values.phone,
                 consignee: values.consignee,
                 deliverAddress: values.deliverAddress,
                 orderState: values.orderState,
                 orderAmount: values.orderAmount,
                 remarks: values.remarks,
-                deliveryTime: values.deliveryTime
+                deliveryTime: numToTime(values.deliveryTime.valueOf()) // TODO:日期组件返回的是dayjs对象，valueOf转换成时间戳
             });
             if (res.code) {
                 setConfirmLoading(false);
@@ -215,7 +215,7 @@ export default function order() {
                         </Form.Item>
                     </Flex>
                 </Form>
-                <Table classNames={{ root: s.tableRoot, header: { cell: s.tableHeader }, body: { cell: s.tableBody } }} columns={columns} dataSource={dataSource} loading={pageLoading} scroll={{ y: 55 * 8, x: 'max-content' }} pagination={false} />
+                <Table classNames={{ root: s.tableRoot, header: { cell: s.tableHeader }, body: { cell: s.tableBody } }} columns={columns} dataSource={dataSource} loading={pageLoading} scroll={{ y: 55 * 11, x: 'max-content' }} pagination={false} />
                 <Flex justify="center" align="center" style={{ width: '100%' }} >
                     <Pagination
                         total={total}

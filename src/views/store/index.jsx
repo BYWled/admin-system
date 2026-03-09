@@ -2,9 +2,8 @@ import { useEffect, useState } from 'react'
 import dayjs from 'dayjs'; // TODO:由于antd日期组件依赖dayjs处理日期，这里也引入dayjs以避免报错
 import { getStoreApi, uploadStoreImageApi, editStoreApi } from '../../api/storeApi';
 import { EditOutlined, ArrowLeftOutlined, PlusOutlined } from '@ant-design/icons';
-import { App, Button, Card, Flex, Form, Input, DatePicker, Divider, Descriptions, Typography, Avatar, InputNumber, Upload, Spin, Image } from 'antd';
+import { App, Button, Card, Flex, Form, Input, TimePicker, Divider, Descriptions, Typography, Avatar, InputNumber, Upload, Spin, Image } from 'antd';
 import { baseURL } from '../../utils/service';
-const { RangePicker } = DatePicker;
 const { TextArea } = Input;
 const { Text } = Typography;
 import s from '../../styles/layout.module.scss'
@@ -420,7 +419,7 @@ export default function store() {
                                 <Divider >营业与配送</Divider>
                                 <Flex gap="middle" wrap>
                                     <Form.Item label="营业时间" name="date" rules={[{ required: true, message: '请选择营业时间!' }]} style={{ flex: '0 0 calc(25% - 12px)' }}>
-                                        <RangePicker className={s.input} format={'HH:mm:ss'} showTime style={{ width: '100%' }} />
+                                        <TimePicker.RangePicker className={s.input} format={'HH:mm:ss'} showTime style={{ width: '100%' }} />
                                     </Form.Item>
                                     <Form.Item label="起送价" name="minPrice" rules={[{ required: true, message: '请输入起送价!' }]} style={{ flex: '0 0 calc(25% - 12px)' }}>
                                         <InputNumber className={s.input} min={0} prefix="￥" style={{ width: '100%' }} />

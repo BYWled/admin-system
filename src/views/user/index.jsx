@@ -229,7 +229,7 @@ export default function User() {
                 </Flex>
                 <Table
                     classNames={{ root: s.tableRoot, header: { cell: s.tableHeader }, body: { cell: s.tableBody } }}
-                    rowSelection={rowSelection} columns={columns} dataSource={dataSource} loading={pageLoading} scroll={{ y: 55 * 8, x: 'max-content' }} pagination={false} />
+                    rowSelection={rowSelection} columns={columns} dataSource={dataSource} loading={pageLoading} scroll={{ y: 55 * 12, x: 'max-content' }} pagination={false} />
                 <Flex justify="center" align="center" style={{ width: '100%' }} >
                     <Pagination
                         total={total}

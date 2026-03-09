@@ -53,6 +53,16 @@
     height: 24px;
 }
 
+.drawerSection {
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+}
+
+.drawerBody {
+    padding-top: 0;
+}
+
+
 .rightMenuCardArea {
     flex: 1;
     margin-bottom: 10px;

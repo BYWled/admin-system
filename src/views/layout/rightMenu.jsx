@@ -219,13 +219,17 @@ export default function RightMenu(props) {
 
     return <Drawer open={props.rightMenu} onClose={props.tRightMenu} closable={false} destroyOnHidden={true} mask={{ blur: false }} placement="right"
         size={'20vw'} title="设置" footer={null}
+        classNames={{
+            section: s.drawerSection,
+            body: s.drawerBody
+        }}
         styles={{
             section: {
-                color: 'var(--textColor)',
                 backgroundColor: 'var(--backColor)',
-            },
-            body: { paddingTop: '0' }
-        }}>
+                color: 'var(--textColor)',
+            }
+        }}
+    >
         <Flex vertical={true} justify='space-between' style={{ width: '100%', height: '100%' }}>
             {/* 卡片区域 */}
             <Flex vertical={true} gap="2vh" className={s.rightMenuCardArea}>
