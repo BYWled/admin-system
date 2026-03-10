@@ -1,5 +1,5 @@
 import { App, Avatar, Button, Card, Empty, Flex, Spin, Statistic, Typography } from "antd";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ArrowDownOutlined, ArrowUpOutlined, InfoCircleOutlined, ReloadOutlined } from "@ant-design/icons";
 import * as echarts from "echarts";
 import s from "../../styles/layout.module.scss";
@@ -20,6 +20,11 @@ export default function home() {
     const [orderMaxDown, setOrderMaxDown] = useState(0);
     const [allOrders, setAllOrders] = useState(0);
     const [allSales, setAllSales] = useState(0);
+    const [promiseRes, setPromiseRes] = useState({});
+    const chartContainerRef = useRef(null);
+    const chartRef = useRef(null);
+    const resizeObserverRef = useRef(null);
+    const skipFirstResizeRef = useRef(true);
 
     const getTableData = async () => {
         setLoading(true);
@@ -33,12 +38,48 @@ export default function home() {
             return message.info('暂无用户统计数据');
         };
 
+        setEmptyCharts(false);
+        setPromiseRes(res);
+        setLoading(false);
+    }
+
+    // 初始化
+    useEffect(() => {
+        // 刷新数据
+        getTableData();
+
+        // 设置问候语
+        const nowTime = (Temporal.Now.plainDateTimeISO().hour / 6);
+        if (nowTime || nowTime === 0) {
+            switch (Math.floor(nowTime)) {
+                case 0:
+                    setSalutation('夜深了，注意休息🌙');
+                    break;
+                case 1:
+                    setSalutation('上午好，新的一天开始了(*^▽^*)');
+                    break;
+                case 2:
+                    setSalutation('下午好，就快下班了💪');
+                    break;
+                case 3:
+                    setSalutation('晚上好，一天的工作结束了🌟');
+                    break;
+            }
+        }
+
+        // 寻找身份
+        const { role } = localStorage.getItem('admin') ? JSON.parse(localStorage.getItem('admin')) : {};
+        if (role) setRoleName(role);
+    }, []);
+
+    useEffect(() => {
+        // 数据为空时不渲染图表，显示空状态
+        if (emptyCharts || !promiseRes.data?.source?.length) return;
+
         // 处理图表
         const chartLegendData = [];
         const chartLegendSelected = [];
-        const echartsDom = document.querySelector('#echartsStats');
-        const echartsTable = echarts.init(echartsDom);
-        const chartSeries = res.data.source.map(item => {
+        const chartSeries = promiseRes.data.source.map(item => {
             // 处理最大涨幅和降幅
             if (item.type === '注册人数') {
                 let lastNum = item.data[0];
@@ -73,8 +114,15 @@ export default function home() {
                 data: item.data
             }
         });
-        echartsTable.setOption({
-            xAxis: { data: res.data.date },
+
+        const echartsDom = chartContainerRef.current;
+        if (!echartsDom) return;
+
+        // 数据刷新时重建实例，保证首帧动画完整播放
+        chartRef.current?.dispose();
+        chartRef.current = echarts.init(echartsDom);
+        chartRef.current.setOption({
+            xAxis: { data: promiseRes.data.date },
             yAxis: {},
             legend: {
                 type: 'scroll',
@@ -89,41 +137,26 @@ export default function home() {
             },
             series: chartSeries
         });
-        // 监听图标自适应
-        const resizeObserver = new ResizeObserver(() => echartsTable.resize());
-        resizeObserver.observe(echartsDom);
-
-        setLoading(false);
-    }
-
-    // 初始化
-    useEffect(() => {
-        // 刷新数据
-        getTableData();
-
-        // 设置问候语
-        const nowTime = (Temporal.Now.plainDateTimeISO().hour / 6);
-        if (nowTime || nowTime === 0) {
-            switch (Math.floor(nowTime)) {
-                case 0:
-                    setSalutation('夜深了，注意休息🌙');
-                    break;
-                case 1:
-                    setSalutation('上午好，新的一天开始了(*^▽^*)');
-                    break;
-                case 2:
-                    setSalutation('下午好，就快下班了💪');
-                    break;
-                case 3:
-                    setSalutation('晚上好，一天的工作结束了🌟');
-                    break;
+        resizeObserverRef.current?.disconnect();
+        // TODO: 由于首帧动画会被 resize 打断，通过 skipFirstResizeRef 来跳过首次 resize 事件
+        resizeObserverRef.current = new ResizeObserver(() => {
+            // 首次跳过以免打断首帧动画
+            if (skipFirstResizeRef.current) {
+                skipFirstResizeRef.current = false;
+                return;
             }
-        }
+            chartRef.current?.resize();
+        });
+        // 监听容器尺寸变化以实现响应式调整
+        resizeObserverRef.current.observe(echartsDom);
 
-        // 寻找身份
-        const { role } = localStorage.getItem('admin') ? JSON.parse(localStorage.getItem('admin')) : {};
-        if (role) setRoleName(role);
-    }, []);
+        return () => {
+            // 组件卸载时清理资源
+            resizeObserverRef.current?.disconnect();
+            chartRef.current?.dispose();
+            chartRef.current = null;
+        };
+    }, [promiseRes]);
 
     return (
         <Spin spinning={loading} size="large">
@@ -232,7 +265,7 @@ export default function home() {
                                 />
                             </Flex>
                         ) : (
-                            <div id="echartsStats" style={{ width: '100%', height: 'calc(50vh - 28px)' }}></div>
+                            <div ref={chartContainerRef} id="echartsStats" style={{ width: '100%', height: 'calc(50vh - 28px)' }}></div>
                         )}
                     </Card>
                 </Flex>

@@ -6,8 +6,8 @@ import s from '../../styles/layout.module.scss'
 
 export default function LeftHeader(props) {
     // ******************初始化变量、Hooks******************
-    const [collapsed, setCollapsed] = useState(props.collapsed || false);
-    const [nowUrl, setNowUrl] = useState([]);
+    const [collapsed, setCollapsed] = useState(props.collapsed || false),
+        [nowUrl, setNowUrl] = useState([]);
 
     // ******************副作用函数部分，用作生命周期与监听******************
     // 载入当前路径面包屑导航
@@ -28,8 +28,8 @@ export default function LeftHeader(props) {
             path: '/' + urlArr[0]
         };
         if (urlArr.length > 1) {
-            urlArr[0].path = '/home'; // 一级路径溯源回首页
             const currentLv2Router = currentLv1Router.children.find(c => c.path === urlArr[1]);
+            // 先拼接二级页面路径，再更新面包屑数据
             urlArr[1] = {
                 title: (
                     <>
@@ -37,8 +37,9 @@ export default function LeftHeader(props) {
                         <span>{currentLv2Router ? currentLv2Router.label : '未知页面'}</span>
                     </>
                 ),
-                path: '/' + urlArr[1]
-            }
+                href: '#' + urlArr[0].path + '/' + urlArr[1]
+            };
+            urlArr[0].path = '/home'; // 二级路径中的一级路径溯源回首页
         };
         setNowUrl(urlArr);
     }, [window.location.hash]);

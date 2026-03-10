@@ -1,13 +1,18 @@
 import { App, Card, Button, Empty, Flex, Typography } from 'antd'
 import { InfoCircleOutlined, ReloadOutlined } from '@ant-design/icons';
 import * as echarts from 'echarts';
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { getGoodsApi } from '../../api/echartsApi';
 import s from '../../styles/layout.module.scss'
 
 export default function statisticsGoods() {
     const { message } = App.useApp();
     const [emptyData, setEmptyData] = useState(false);
+    const [promiseRes, setPromiseRes] = useState({});
+    const chartContainerRef = useRef(null);
+    const chartRef = useRef(null);
+    const resizeObserverRef = useRef(null);
+    const skipFirstResizeRef = useRef(true);
 
     const getTableData = async () => {
         const res = await getGoodsApi();
@@ -19,9 +24,22 @@ export default function statisticsGoods() {
             setEmptyData(true);
             return message.info('暂无商品统计数据');
         };
+        setEmptyData(false);
+        setPromiseRes(res);
+    }
+
+    useEffect(() => {
+        getTableData();
+    }, []);
+
+    useEffect(() => {
+        // 数据为空时不渲染图表，显示空状态
+        if (emptyData || !promiseRes.data?.source?.length) return;
+
+        // 构建图例数据和系列数据
         const chartLegendData = [];
         const chartLegendSelected = [];
-        const chartSeries = res.data.source.map(item => {
+        const chartSeries = promiseRes.data?.source.map(item => {
             chartLegendData.push(item.type);
             chartLegendSelected.push({ [item.type]: true });
             return {
@@ -31,11 +49,17 @@ export default function statisticsGoods() {
                 data: item.data
             }
         });
-        const echartsDom = document.querySelector('#echartsGoods');
-        const echartsTable = echarts.init(echartsDom);
-        echartsTable.setOption({
+
+        // 初始化 ECharts 实例并设置配置项
+        const echartsDom = chartContainerRef.current;
+        if (!echartsDom) return;
+
+        // 数据刷新时重建实例，保证首帧动画完整播放
+        chartRef.current?.dispose();
+        chartRef.current = echarts.init(echartsDom);
+        chartRef.current.setOption({
             title: { text: '商品统计', top: 0 },
-            xAxis: { data: res.data.date },
+            xAxis: { data: promiseRes.data?.date },
             yAxis: {},
             legend: {
                 type: 'scroll',
@@ -50,15 +74,26 @@ export default function statisticsGoods() {
             },
             series: chartSeries
         });
+        resizeObserverRef.current?.disconnect();
+        // TODO: 由于首帧动画会被 resize 打断，通过 skipFirstResizeRef 来跳过首次 resize 事件
+        resizeObserverRef.current = new ResizeObserver(() => {
+            // 首次跳过以免打断首帧动画
+            if (skipFirstResizeRef.current) {
+                skipFirstResizeRef.current = false;
+                return;
+            }
+            chartRef.current?.resize();
+        });
+        // 监听容器尺寸变化以实现响应式调整
+        resizeObserverRef.current.observe(echartsDom);
 
-        // 监听图标自适应
-        const resizeObserver = new ResizeObserver(() => echartsTable.resize());
-        resizeObserver.observe(echartsDom);
-    }
-
-    useEffect(() => {
-        getTableData();
-    }, []);
+        return () => {
+            // 组件卸载时清理资源
+            resizeObserverRef.current?.disconnect();
+            chartRef.current?.dispose();
+            chartRef.current = null;
+        };
+    }, [promiseRes]);
 
     return (
         <Card classNames={{ root: s.cardRoot, header: s.cardHeader, title: s.cardTitle }} variant="borderless" style={{ width: '100%', height: '75vh' }} >
@@ -74,7 +109,7 @@ export default function statisticsGoods() {
                     />
                 </Flex>
             ) : (
-                <div id="echartsGoods" style={{ width: '100%', height: 'calc(75vh - 40px)' }}></div>
+                <div ref={chartContainerRef} id="echartsGoods" style={{ width: '100%', height: 'calc(75vh - 40px)' }}></div>
             )}
         </Card>
     )
