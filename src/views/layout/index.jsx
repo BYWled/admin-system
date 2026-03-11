@@ -3,6 +3,7 @@ import LeftMenu from './leftMenu'
 import RightMenu from './rightMenu'
 import LeftHeader from './header'
 import MenuHeader from './menuHeader'
+import LayoutFooter from './footer'
 import { Outlet } from 'react-router-dom'
 import { App, Layout, Tour, Input, Flex, Button, FloatButton } from 'antd';
 import { SettingOutlined } from '@ant-design/icons';
@@ -13,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 
 export default function layout() {
   // ******************初始化变量、Hooks******************
-  const { Header, Footer, Sider, Content } = Layout;
+  const { Header, Sider, Content } = Layout;
   const [collapsed, setCollapsed] = useState(false);
   const [rightMenu, setRightMenu] = useState(false);
   const [lockScreen, setLockScreen] = useState(false);
@@ -161,44 +162,25 @@ export default function layout() {
         // 非全屏且非锁屏状态下的布局
         !lockScreen && !fullscreen && <Layout>
           {
+            // 顶部菜单模式下不显示侧边栏
             !topMenuMode && <Sider className={s.leftMenu} collapsed={collapsed}>
               <LeftMenu collapsed={collapsed} darkMode={darkMode} />
             </Sider>
           }
+          {/* 主要内容区域 */}
           <Layout className={s.layoutMain}>
             <Header className={s.layoutHeader}>
               {
+                // 顶部菜单模式下显示 MenuHeader，否则显示 LeftHeader
                 topMenuMode ? <MenuHeader time={time} rightMenu={rightMenu} tRightMenu={tRightMenu} darkMode={darkMode} /> :
                   <LeftHeader time={time} rightMenu={rightMenu} tRightMenu={tRightMenu} tCollapsed={setCollapsed} collapsed={collapsed} darkMode={darkMode} />
               }
             </Header>
             <Content className={s.layoutContent}>
               <Outlet />
-              <FloatButton.BackTop />
             </Content>
             {
-              footerMode && <Footer className={s.layoutFooter}>
-                <Flex justify='center' align='center' style={{ width: '100%', height: '100%' }}>
-                  {/* TODO:_blank 新增标签页打开 */}
-                  <Button color={darkMode ? "geekblue" : "default"} styles={{
-                    root: {
-                      height: '100%',
-                      padding: 0,
-                    }
-                  }}
-                    onClick={() => window.open('https://github.com/BYWled/admin-system', '_blank')}
-                    variant="link">admin-system Test-03.10</Button>
-                  <span>&nbsp;©2026 Created by&nbsp;</span>
-                  <Button color={darkMode ? "geekblue" : "default"} styles={{
-                    root: {
-                      height: '100%',
-                      padding: 0,
-                    }
-                  }}
-                    onClick={() => window.open('https://github.com/BYWled', '_blank')}
-                    variant="link">BYWled</Button>
-                </Flex>
-              </Footer>
+              footerMode && <LayoutFooter time={time}  darkMode={darkMode} />
             }
           </Layout>
         </Layout>
@@ -207,7 +189,6 @@ export default function layout() {
         // 全屏状态下的布局
         fullscreen && <Content className={s.layoutContent} style={{ height: '100vh', boxSizing: 'border-box' }}>
           <Outlet />
-          <FloatButton.BackTop />
         </Content>
       }
       {/* 全屏时显示设置悬浮 */}

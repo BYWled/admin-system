@@ -55,7 +55,7 @@
 | 网络请求 | Axios                 |
 | 样式     | Sass / SCSS           |
 | 图表     | ECharts 6             |
-| 日期处理 | dayjs                 |  | temporal |
+| 日期处理 | dayjs & temporal      |
 | 截图导出 | html2canvas           |
 | 图片裁切 | antd-img-crop         |
 | 工具库   | js-md5、react-countup |
@@ -174,9 +174,9 @@ export const baseURL = 'https://******';
 
 ## 开源协议
 
-本项目采用 GNU General Public License v3.0 or later 开源发布，详见 LICENSE。
+本项目采用 Apache License 2.0 开源发布，详见 LICENSE。
 
-这意味着你可以在遵守 GPL 协议要求的前提下使用、修改和分发本项目及其衍生作品；若分发修改版本，也需要继续以 GPL 兼容方式公开源代码。
+这意味着你可以在遵守 Apache 2.0 协议要求的前提下使用、修改和分发本项目，包括商业使用；但你需要保留原始版权声明、许可证文本以及相关 NOTICE 信息（如适用），并明确说明你做出的修改。
 
 ## 致谢
 
