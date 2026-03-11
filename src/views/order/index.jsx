@@ -203,6 +203,8 @@ export default function order() {
                                 className={s.input}
                                 value={formData.date[0] && formData.date[1] ? [dayjs(formData.date[0]), dayjs(formData.date[1])] : []}
                                 showTime
+                                needConfirm={false}
+                                allowClear={false}
                                 placeholder={['开始时间', '结束时间']}
                                 format="YYYY-MM-DD HH:mm:ss"
                                 onChange={(dates, dateStrings) => setFormData({ ...formData, date: dateStrings })} />
