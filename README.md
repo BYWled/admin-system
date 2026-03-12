@@ -221,7 +221,6 @@ export const baseURL = 'https://******';
 
 ## 致谢
 
-- 
 - UI 组件基于 [Ant Design](https://ant.design/)
 - 图表能力基于 [Apache ECharts](https://echarts.apache.org/)
 - 构建能力基于 [Vite](https://vitejs.dev/)
@@ -229,4 +228,4 @@ export const baseURL = 'https://******';
 
 ## 仓库说明
 
-主分支 README 已按当前项目结构重新整理。如果你正在查看的是镜像仓库，请以当前分支代码和本 README 为准；历史版本中的**旧说明***、**旧协议**与**旧运行限制**已经不再适用。
+主分支 README 已按当前项目结构重新整理。如果你正在查看的是镜像仓库，请以当前分支代码和本 README 为准；历史版本中的**旧说明**、**旧协议**与**旧运行限制**已经不再适用。
