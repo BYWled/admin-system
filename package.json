@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "~6.1.0",
+    "@uiw/react-md-editor": "^4.0.11",
     "antd": "^6.1.4",
     "antd-img-crop": "^4.29.0",
     "axios": "^1.13.2",

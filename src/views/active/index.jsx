@@ -3,13 +3,13 @@ import { getActiveApi, addActiveApi, deleteActiveApi, editActiveApi } from '../.
 import { timeToDate } from '../../utils/time';
 import dayjs from 'dayjs';
 import {
-    App, Button, Card, Flex, Table, Modal, Form, Input, Popconfirm, Pagination, DatePicker, Radio, Tag, Tooltip, Typography
+    App, Button, Card, Flex, Table, Modal, Form, Input, Popconfirm, Pagination, DatePicker, Radio, Tag, Tooltip, Typography, Descriptions, Divider
 } from 'antd'
 import { UserOutlined } from '@ant-design/icons';
+import MDEditor from '@uiw/react-md-editor';
 import s from '../../styles/layout.module.scss'
 
 export default function Active() {
-    const [selectedRowIds, setSelectedRowIds] = useState([]);
     const [pageSize, setPageSize] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
     const [total, setTotal] = useState(0);
@@ -18,10 +18,15 @@ export default function Active() {
     const [confirmLoading, setConfirmLoading] = useState(false); // 通用确认加载状态，一般仅有一个弹窗
     const [addDia, setAddDia] = useState(false);
     const [editDia, setEditDia] = useState(false);
+    const [detailsDia, setDetailsDia] = useState(false);
     const [editFormData, setEditFormData] = useState({});
     const { message } = App.useApp();
     const [addForm] = Form.useForm();
     const [editForm] = Form.useForm();
+    const [addMDText, setAddMDText] = useState('');
+    const [editMDText, setEditMDText] = useState('');
+    const [detailsMDText, setDetailsMDText] = useState('');
+    const [detailsData, setDetailsData] = useState({});
 
     // 表单提交按钮
     const SubmitButton = ({ form, children, loading }) => {
@@ -68,10 +73,14 @@ export default function Active() {
     // 添加活动接口
     const addActive = async (values) => {
         setConfirmLoading(true);
+        if (!addMDText) {
+            setConfirmLoading(false);
+            return message.error('请输入活动内容');
+        }
         const res = await addActiveApi({
             title: values.title,
             type: values.type,
-            content: values.content,
+            content: addMDText,
             status: values.status,
             s_time: values.times[0].valueOf(), //TODO: dayjs获取时间戳的写法，直接.valueOf()
             e_time: values.times[1].valueOf()
@@ -84,6 +93,7 @@ export default function Active() {
         message.success('活动已添加');
         getTableData();
         addForm.resetFields(); // 重置表单
+        setAddMDText(''); // 重置Markdown编辑器内容
         setAddDia(false);
     }
 
@@ -98,8 +108,16 @@ export default function Active() {
         getTableData();
     }
 
+    // 查看活动详情
+    const openDetails = (item) => {
+        setDetailsData({ ...item }); // 深拷贝
+        setDetailsMDText(item.content || '');
+        setDetailsDia(true);
+    }
+
     // 修改活动
     const openEdit = (item) => {
+        setConfirmLoading(false);
         setEditFormData({ ...item });
         editForm.setFieldsValue({
             title: item.title,
@@ -108,15 +126,20 @@ export default function Active() {
             status: item.status,
             content: item.content
         });
+        setEditMDText(item.content);
         setEditDia(true);
     }
     const editActive = async (values) => {
         setConfirmLoading(true);
+        if (!editMDText) {
+            setConfirmLoading(false);
+            return message.error('请输入活动内容');
+        }
         const res = await editActiveApi({
             id: editFormData.id,
             title: values.title,
             type: values.type,
-            content: values.content,
+            content: editMDText,
             status: values.status,
             s_time: values.times[0].valueOf(),
             e_time: values.times[1].valueOf()
@@ -127,6 +150,7 @@ export default function Active() {
             return;
         }
         setEditFormData({});
+        setAddMDText('');
         editForm.resetFields();
         getTableData();
         setConfirmLoading(false);
@@ -161,6 +185,7 @@ export default function Active() {
         </Tag>,
         action: (
             <Flex gap="small">
+                <Button color="green" variant="solid" onClick={() => openDetails(item)}>详情</Button>
                 <Button color="primary" variant="solid" onClick={() => openEdit(item)}>编辑</Button>
                 <Popconfirm
                     title="警告"
@@ -178,11 +203,6 @@ export default function Active() {
         )
     }));
 
-    const rowSelection = {
-        selectedRowIds,
-        onChange: row => setSelectedRowIds(row),
-    };
-
     return (
         <Card classNames={{ root: s.cardRoot, header: s.cardHeader, title: s.cardTitle }} variant="borderless" style={{ width: '100%' }}>
             <Flex vertical justify="center" align="center" style={{ width: '100%' }} gap="small" >
@@ -193,7 +213,66 @@ export default function Active() {
                 </Flex>
                 <Table
                     classNames={{ root: s.tableRoot, header: { cell: s.tableHeader }, body: { cell: s.tableBody } }}
-                    rowSelection={rowSelection} columns={columns} dataSource={dataSource} loading={pageLoading} scroll={{ y: 55 * 12, x: 'max-content' }} pagination={false} />
+                    columns={columns} dataSource={dataSource} loading={pageLoading} scroll={{ y: 55 * 12, x: 'max-content' }} pagination={false} />
+                {/* 活动详情 */}
+                <Modal
+                    title="活动详情"
+                    open={detailsDia}
+                    footer={null}
+                    onCancel={() => {
+                        setDetailsDia(false);
+                        setDetailsData({});
+                        setDetailsMDText('');
+                    }}
+                    destroyOnHidden={true}
+                    mask={{ blur: false }}
+                    width="50vw"
+                    centered
+                    classNames={{
+                        container: s.modalContainer,
+                        header: s.modalHeader,
+                        title: s.modalTitle,
+                        body: s.modalBody,
+                        footer: s.modalFooter
+                    }}
+                >
+                    <div style={{ maxHeight: '60vh', overflowY: 'auto', padding: '4px 8px 8px' }}>
+                        <Card size="small" variant="outlined" style={{ margin: 12 }} classNames={{ root: s.cardRoot, header: s.cardHeader, title: s.cardTitle }}>
+                            <Flex justify="space-between" align="start" wrap gap="small">
+                                <Typography.Title level={5} style={{ margin: 0 }} className={s.cardTitle}>
+                                    {detailsData.title || '-'}
+                                </Typography.Title>
+                                <Flex gap="small" wrap>
+                                    <Tag color={detailsData.status ? 'green' : 'red'}>
+                                        {detailsData.status ? '启用' : '禁用'}
+                                    </Tag>
+                                    {Date.now() < detailsData.s_time ? (
+                                        <Tag color="blue">活动未开始</Tag>
+                                    ) : Date.now() > detailsData.e_time ? (
+                                        <Tag color="red">活动已结束</Tag>
+                                    ) : (
+                                        <Tag color="green">活动进行中</Tag>
+                                    )}
+                                </Flex>
+                            </Flex>
+
+                            <Descriptions column={2} size="small" style={{ marginTop: 12 }} classNames={{ root: s.descRoot, label: s.descLabelInline, content: s.descContent }}>
+                                <Descriptions.Item label="活动ID">{detailsData.id || '-'}</Descriptions.Item>
+                                <Descriptions.Item label="活动类型">{detailsData.type || '-'}</Descriptions.Item>
+                                <Descriptions.Item label="开始时间">
+                                    {detailsData.s_time ? timeToDate(detailsData.s_time, 'all', true) : '-'}
+                                </Descriptions.Item>
+                                <Descriptions.Item label="结束时间">
+                                    {detailsData.e_time ? timeToDate(detailsData.e_time, 'all', true) : '-'}
+                                </Descriptions.Item>
+                            </Descriptions>
+                        </Card>
+                        <div className='data-color-mode'>
+                            <MDEditor.Markdown source={detailsMDText || '暂无活动内容'} style={{ whiteSpace: 'pre-wrap', padding: '16px', background: 'transparent' }} />
+                        </div>
+                    </div>
+                </Modal>
+                {/* 分页 */}
                 <Flex justify="center" align="center" style={{ width: '100%' }} >
                     <Pagination
                         total={total}
@@ -229,6 +308,8 @@ export default function Active() {
                 onCancel={() => setAddDia(false)}
                 destroyOnHidden={true}
                 mask={{ blur: false }}
+                width="50vw"
+                centered
                 classNames={{
                     container: s.modalContainer,
                     header: s.modalHeader,
@@ -248,40 +329,48 @@ export default function Active() {
                         label: s.formLabel
                     }}
                 >
-                    <Form.Item
-                        label="活动标题"
-                        name="title"
-                        rules={[{ required: true, message: '请输入活动标题!' }]}
-                        prefix={<UserOutlined />}
-                    >
-                        <Input className={s.input} allowClear placeholder="请输入活动标题" />
-                    </Form.Item>
+                    <Flex justify="space-between" wrap align="center" style={{ width: '100%' }} gap="small" >
+                        <Form.Item
+                            label="活动标题"
+                            name="title"
+                            style={{ width: '45%' }}
+                            rules={[{ required: true, message: '请输入活动标题!' }]}
+                            prefix={<UserOutlined />}
+                        >
+                            <Input className={s.input} allowClear placeholder="请输入活动标题" />
+                        </Form.Item>
 
-                    <Form.Item
-                        label="活动时间"
-                        name="times"
-                        rules={[{ required: true, message: '请选择时间!' }]}
-                    >
-                        <DatePicker.RangePicker className={s.input} format={'YYYY-MM-DD HH:mm:ss'} showTime needConfirm={false}
-                            allowClear={false} style={{ width: '100%' }} placeholder={['开始时间', '结束时间']} />
-                    </Form.Item>
+                        <Form.Item
+                            label="活动时间"
+                            name="times"
+                            style={{ width: '45%' }}
+                            rules={[{ required: true, message: '请选择时间!' }]}
+                        >
+                            <DatePicker.RangePicker className={s.input} format={'YYYY-MM-DD HH:mm:ss'} showTime needConfirm={false}
+                                allowClear={false} style={{ width: '100%' }} placeholder={['开始时间', '结束时间']} />
+                        </Form.Item>
 
-                    <Form.Item label="活动类型" name="type">
-                        <Input className={s.input} allowClear placeholder="请输入活动类型" />
-                    </Form.Item>
+                        <Form.Item label="活动类型" name="type" style={{ width: '45%' }}>
+                            <Input className={s.input} allowClear placeholder="请输入活动类型" />
+                        </Form.Item>
 
-                    <Form.Item
-                        label="活动状态"
-                        name="status"
-                    >
-                        <Radio.Group options={[
-                            { label: '启用', value: 1 },
-                            { label: '禁用', value: 0 },
-                        ]} defaultValue={0} optionType="button" />
-                    </Form.Item>
+                        <Form.Item
+                            label="活动状态"
+                            name="status"
+                            style={{ width: '45%' }}
+                            rules={[{ required: true, message: '请选择活动状态!' }]}
+                        >
+                            <Radio.Group options={[
+                                { label: '启用', value: 1 },
+                                { label: '禁用', value: 0 },
+                            ]} optionType="button" />
+                        </Form.Item>
+                    </Flex>
 
-                    <Form.Item label="活动内容" name="content" rules={[{ required: true, message: '请输入活动内容!' }]}>
-                        <Input className={s.input} allowClear placeholder="请输入活动内容" />
+                    <Form.Item label="活动内容">
+                        <div className='data-color-mode'>
+                            <MDEditor value={addMDText} textareaProps={{ placeholder: '请输入活动内容，支持Markdown格式' }} height={300} onChange={(value) => setAddMDText(value)} />
+                        </div>
                     </Form.Item>
 
                     <Flex justify="end" align="center" style={{ width: '100%' }} >
@@ -302,6 +391,7 @@ export default function Active() {
                 }}
                 destroyOnHidden={true}
                 mask={{ blur: false }}
+                width="50vw"
                 centered
                 classNames={{
                     container: s.modalContainer,
@@ -323,40 +413,47 @@ export default function Active() {
                         label: s.formLabel
                     }}
                 >
-                    <Form.Item
-                        label="活动标题"
-                        name="title"
-                        rules={[{ required: true, message: '请输入活动标题!' }]}
-                        prefix={<UserOutlined />}
-                    >
-                        <Input className={s.input} allowClear placeholder="请输入活动标题" />
-                    </Form.Item>
+                    <Flex justify="space-between" wrap align="center" style={{ width: '100%' }} gap="small" >
 
-                    <Form.Item
-                        label="活动时间"
-                        name="times"
-                        rules={[{ required: true, message: '请选择时间!' }]}
-                    >
-                        <DatePicker.RangePicker className={s.input} format={'YYYY-MM-DD HH:mm:ss'} showTime needConfirm={false}
-                            allowClear={false} style={{ width: '100%' }} placeholder={['开始时间', '结束时间']} />
-                    </Form.Item>
+                        <Form.Item
+                            label="活动标题"
+                            name="title"
+                            style={{ width: '45%' }}
+                            rules={[{ required: true, message: '请输入活动标题!' }]}
+                            prefix={<UserOutlined />}
+                        >
+                            <Input className={s.input} allowClear placeholder="请输入活动标题" />
+                        </Form.Item>
 
-                    <Form.Item label="活动类型" name="type">
-                        <Input className={s.input} allowClear placeholder="请输入活动类型" />
-                    </Form.Item>
+                        <Form.Item
+                            label="活动时间"
+                            name="times"
+                            style={{ width: '45%' }}
+                            rules={[{ required: true, message: '请选择时间!' }]}
+                        >
+                            <DatePicker.RangePicker className={s.input} format={'YYYY-MM-DD HH:mm:ss'} showTime needConfirm={false}
+                                allowClear={false} style={{ width: '100%' }} placeholder={['开始时间', '结束时间']} />
+                        </Form.Item>
 
-                    <Form.Item
-                        label="活动状态"
-                        name="status"
-                    >
-                        <Radio.Group options={[
-                            { label: '启用', value: 1 },
-                            { label: '禁用', value: 0 },
-                        ]} optionType="button" />
-                    </Form.Item>
+                        <Form.Item label="活动类型" name="type" style={{ width: '45%' }}>
+                            <Input className={s.input} allowClear placeholder="请输入活动类型" />
+                        </Form.Item>
 
-                    <Form.Item label="活动内容" name="content" rules={[{ required: true, message: '请输入活动内容!' }]}>
-                        <Input className={s.input} allowClear placeholder="请输入活动内容" />
+                        <Form.Item
+                            label="活动状态"
+                            name="status"
+                            style={{ width: '45%' }}
+                        >
+                            <Radio.Group options={[
+                                { label: '启用', value: 1 },
+                                { label: '禁用', value: 0 },
+                            ]} optionType="button" />
+                        </Form.Item>
+                    </Flex>
+                    <Form.Item label="活动内容">
+                        <div className='data-color-mode'>
+                            <MDEditor value={editMDText} textareaProps={{ placeholder: '请输入活动内容，支持Markdown格式' }} height={300} onChange={(value) => setEditMDText(value)} />
+                        </div>
                     </Form.Item>
 
                     <Flex justify="end" align="center" style={{ width: '100%' }} >

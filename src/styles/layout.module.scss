@@ -236,6 +236,9 @@
   color: var(--textColor) !important;
 }
 
+.descLabelInline {
+  color: color-mix(in srgb, var(--textColor) 60%, #eee) !important;
+}
 // ****************** 选择器通用样式 ******************
 .selectRoot {
   background-color: color-mix(in srgb, var(--backColor) 60%, #eee) !important;

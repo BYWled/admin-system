@@ -93,9 +93,11 @@ export default function layout() {
     if (darkMode) {
       root.style.setProperty("--backColor", "#111");
       root.style.setProperty("--textColor", "#eee");
+      document.documentElement.setAttribute('data-color-mode', 'dark');
     } else {
       root.style.setProperty("--backColor", "#fefefe");
       root.style.setProperty("--textColor", "#111");
+      document.documentElement.setAttribute('data-color-mode', 'light');
     }
   }, [darkMode]);
 
