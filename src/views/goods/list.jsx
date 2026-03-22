@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { App, Form, Flex, Card, Button, Input, Popconfirm, Table, Typography, Modal, Avatar, InputNumber, Select, Descriptions, Divider, Pagination, Image, Upload } from 'antd';
 import { getGoodsApi, addGoodsApi, editGoodsApi, deleteGoodsApi, getCategoryApi, uploadGoodsImgApi } from '../../api/goodsApi';
-import { timeToDate, numToTime } from '../../utils/time';
+import { timeToDate } from '../../utils/time';
 import { FilterOutlined, PlusOutlined } from '@ant-design/icons';
 import { baseURL } from '../../utils/service';
 import s from '../../styles/layout.module.scss'
@@ -648,7 +648,7 @@ export default function goods() {
                                 <Avatar src={`${baseURL}${item.avatar}`} alt="avatar" size="large" draggable={false} />
                                 <Flex gap="large">
                                     <Typography.Text className={s.cardTitle} strong>{item.username}</Typography.Text>
-                                    <Typography.Text className={s.cardGary} style={{ flex: 1 }}>{numToTime(item.rateTime)}</Typography.Text>
+                                    <Typography.Text className={s.cardGary} style={{ flex: 1 }}>{timeToDate(item.rateTime, 'all', true)}</Typography.Text>
                                     <Typography.Text className={s.cardTitle} strong>{item.rateType ? '好评：' : '差评：'}</Typography.Text>
                                 </Flex>
                                 <Typography.Text className={s.cardTitle} style={{ overflow: 'hidden' }}>{item.text || '无'}</Typography.Text>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { App, Form, Flex, Card, Button, Input, Popconfirm, Table, Modal, Radio, Pagination } from 'antd';
+import { App, Form, Flex, Card, Button, Input, Popconfirm, Table, Modal, Radio, Pagination, Tag } from 'antd';
 import { getClassifyApi, addClassifyApi, editClassifyApi, deleteClassifyApi } from '../../api/classifyApi';
 import { FilterOutlined } from '@ant-design/icons';
 import s from '../../styles/layout.module.scss'
@@ -185,7 +185,11 @@ export default function classify() {
             title: '状态',
             dataIndex: 'state',
             editable: true,
-            render: (state) => state === 1 ? '启用' : '禁用',
+            render: (state) => state === 1 ? <Tag color='green' variant='outlined'>
+                启用
+            </Tag> : <Tag color='red' variant='outlined'>
+                禁用
+            </Tag>,
         },
         {
             title: '操作',

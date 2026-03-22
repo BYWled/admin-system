@@ -33,7 +33,7 @@ jobs:
 
       - name: 构建前替换生产环境 baseUrl
         run: |
-          sed -i "s|export const baseURL = '/api'|export const baseURL = 'https://api-admin.wled.top/api'|g" src/utils/service.js
+          sed -i "s|export const baseURL = '/api'|export const baseURL = 'https://demo-admin.wled.top/api'|g" src/utils/service.js
 
       - name: 构建项目
         run: pnpm run build

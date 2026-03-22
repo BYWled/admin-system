@@ -11,7 +11,8 @@ import GoodsStatistics from '../views/statistics/goods.jsx'
 import OrderStatistics from '../views/statistics/order.jsx'
 import Permission from '../views/character/permission.jsx'
 import Role from '../views/character/role.jsx'
-import { HomeOutlined, AppstoreOutlined, ShopOutlined, ContainerOutlined, BarChartOutlined, TeamOutlined, LockOutlined, LoadingOutlined, CloseCircleOutlined, SmileOutlined } from '@ant-design/icons';
+import Active from '../views/active/index.jsx'
+import { HomeOutlined, AppstoreOutlined, ShopOutlined, ContainerOutlined, BarChartOutlined, FlagOutlined, TeamOutlined, LockOutlined, LoadingOutlined, CloseCircleOutlined, SmileOutlined } from '@ant-design/icons';
 import { verifyTokenApi } from '../api/loginApi.js';
 import { App, Spin, Button, Result, Typography } from 'antd'
 import { useState, useEffect } from 'react';
@@ -92,7 +93,7 @@ const BeforeEach = ({ callback }) => {
         // 调用检查函数
         checkAuth();
 
-    }, [navigate]); // 依赖项：当路径变化时重新检查
+    }, [navigate]); // 当路径变化时重新检查
 
     // 如果正在检查中，返回一个全屏占位 div，暂停渲染子组件
     if (isChecking) {
@@ -104,7 +105,7 @@ const BeforeEach = ({ callback }) => {
     }
 
     // 检查通过，渲染原本的组件
-    return callback || null;
+    return callback || ErrorPage();
 };
 
 // 404错误页组件
@@ -243,6 +244,21 @@ export const staticRouter = [
                 index: true,
                 element: <Store />,
                 label: '店铺管理'
+            }
+        ]
+    },// 店铺管理
+    {
+        id: 8,
+        key: '/active',
+        path: '/active',
+        label: '活动管理',
+        icon: <FlagOutlined />,
+        element: <BeforeEach callback={<Layout />} />,
+        children: [
+            {
+                index: true,
+                element: <Active />,
+                label: '活动管理'
             }
         ]
     },

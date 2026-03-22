@@ -13,7 +13,7 @@ export default function Footer({ darkMode }) {
                     }
                 }}
                     onClick={() => window.open('https://github.com/BYWled/admin-system', '_blank')}
-                    variant="link">admin-system Test-03.17</Button>
+                    variant="link">admin-system Dev-03.22</Button>
                 <span>&nbsp;©2026 Created by&nbsp;</span>
                 <Button color={darkMode ? "geekblue" : "default"} styles={{
                     root: {

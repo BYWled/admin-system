@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { timeToDate, numToTime } from '../../utils/time';
+import { timeToDate } from '../../utils/time';
 import dayjs from 'dayjs'; // TODO:由于antd日期组件依赖dayjs处理日期，这里也引入dayjs以避免报错
 import { getOrderApi, editOrderApi } from '../../api/orderApi';
 import { App, Button, Card, Flex, Table, Modal, Form, Input, DatePicker, Pagination, Divider, Descriptions, InputNumber, Select } from 'antd'
@@ -107,14 +107,14 @@ export default function order() {
             const res = await editOrderApi({
                 id: editForm.id,
                 orderNo: values.orderNo,
-                orderTime: numToTime(values.orderTime.valueOf()), // TODO:日期组件返回的是dayjs对象，valueOf转换成时间戳
+                orderTime: timeToDate(values.orderTime.valueOf(), 'all', true), // TODO:日期组件返回的是dayjs对象，valueOf转换成时间戳
                 phone: values.phone,
                 consignee: values.consignee,
                 deliverAddress: values.deliverAddress,
                 orderState: values.orderState,
                 orderAmount: values.orderAmount,
                 remarks: values.remarks,
-                deliveryTime: numToTime(values.deliveryTime.valueOf()) // TODO:日期组件返回的是dayjs对象，valueOf转换成时间戳
+                deliveryTime: timeToDate(values.deliveryTime.valueOf(), 'all', true) // TODO:日期组件返回的是dayjs对象，valueOf转换成时间戳
             });
             if (res.code) {
                 setConfirmLoading(false);
