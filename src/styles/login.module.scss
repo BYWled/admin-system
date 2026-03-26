@@ -1,36 +1,56 @@
 .login {
-    height: 100vh;
-    background: url(https://www.wled.top/images/wallhaven-wqery6-light.webp) center no-repeat;
-    background-size: cover;
-    display: flex;
-    align-items: center;
+  height: 100vh;
+  background: url(https://www.wled.top/images/wallhaven-wqery6-light.webp)
+    center no-repeat;
+  background-size: cover;
+  display: flex;
+  align-items: center;
 
-    .loginBox {
-        margin: 3%;
-        padding: 0 5%;
-        box-sizing: border-box;
-        width: 40%;
-        height: 90%;
-        border-radius: 20px;
-        background-color: rgba(255, 255, 255, 0.8);
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  .loginBox {
+    margin: 3%;
+    padding: 0 5%;
+    box-sizing: border-box;
+    width: 40%;
+    height: 90%;
+    border-radius: 20px;
+    background-color: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    // 动画：背景淡入，0.8秒，缓出，保持最终状态
+    animation: slideUpFadeIn 0.8s ease-out forwards;
 
-
-        .loginTitle {
-            margin-bottom: 10%;
-        }
-
-        .loginForm {
-            width: 80%;
-        }
-
-        .loginInput,
-        .loginBtn {
-            width: 100%;
-        }
-
-        .loginBtn {
-            margin-top: 10%;
-        }
+    .loginTitle {
+      margin-bottom: 10%;
     }
+
+    .loginForm {
+      width: 80%;
+    }
+
+    .loginInput,
+    .loginBtn {
+      width: 100%;
+    }
+
+    .loginBtn {
+      margin-top: 10%;
+    }
+  }
+}
+
+// 定义上浮淡入动画
+@keyframes slideUpFadeIn {
+  0% {
+    opacity: 0.25;
+    transform: translateX(100px);
+  }
+
+  60% {
+    opacity: 0.75;
+    transform: translateX(-10px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }

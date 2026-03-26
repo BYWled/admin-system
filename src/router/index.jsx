@@ -1,5 +1,5 @@
 import { createHashRouter, useNavigate, useLocation } from 'react-router-dom'
-import Login from '../views/login/index.jsx'
+import Login from '../views/login/index.tsx'
 import Layout from '../views/layout/index.jsx'
 import Home from '../views/home/index.jsx'
 import User from '../views/user/index.jsx'
