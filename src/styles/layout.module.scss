@@ -1,0 +1,265 @@
+:root {
+  --backColor: #111;
+  --textColor: #eee;
+}
+
+.leftMenu {
+  background-color: var(--backColor);
+  height: 100vh;
+}
+
+.menuLogo {
+  padding: 0 5%;
+
+  .menuTitle {
+    padding: 0 8px;
+    font-size: 16px;
+    font-weight: bold;
+  }
+}
+
+.layoutMain {
+  height: 100vh;
+}
+
+.layoutHeader,
+.menuLogo,
+.layoutFooter {
+  height: 6vh;
+  padding: 0 1%;
+  display: flex;
+  align-items: center;
+  background-color: var(--backColor);
+  color: var(--textColor);
+
+  .headerBreadCrumb {
+    flex: 1;
+  }
+}
+
+.layoutContent {
+  flex: 1;
+  background-color: color-mix(in srgb, var(--backColor) 80%, #eee);
+  color: var(--textColor);
+  padding: 20px;
+  overflow: scroll;
+  /* 隐藏 IE/Edge 滚动条 */
+  -ms-overflow-style: none;
+  /* 隐藏 Firefox 滚动条 */
+  scrollbar-width: none;
+}
+
+.layoutFooter {
+  height: 24px;
+}
+
+.drawerSection {
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+
+.drawerBody {
+  padding-top: 0;
+}
+
+.rightMenuCardArea {
+  flex: 1;
+  margin-bottom: 10px;
+  overflow-y: auto;
+  /* 隐藏 IE/Edge 滚动条 */
+  -ms-overflow-style: none;
+  /* 隐藏 Firefox 滚动条 */
+  scrollbar-width: none;
+
+  .menuThemeBox {
+    position: relative;
+    width: 46%;
+    cursor: pointer;
+    box-sizing: border-box;
+    border-radius: 6px;
+    padding: 6% 3%;
+    transition: all 0.3s;
+  }
+
+  .menuCheckout {
+    position: absolute;
+    bottom: 3%;
+    right: 2%;
+    color: #1677ff;
+  }
+}
+
+.lockRoot {
+  width: 100vw;
+  height: 100vh;
+}
+
+// 锁屏背景遮罩
+.lockMask {
+  position: relative;
+  height: 100%;
+  background: url(https://www.wled.top/images/wallhaven-wqery6-light.webp)
+    center no-repeat;
+  background-size: cover;
+  // 动画：背景淡入，0.8秒，缓入缓出，保持最终状态
+  animation: fadeIn 0.8s ease-in-out forwards;
+}
+
+// 锁屏内容
+.lockSection {
+  position: relative;
+  top: 25vh;
+  width: 50vw;
+  min-width: 400px; // 防止过窄
+  padding: 24px;
+  border-radius: 12px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  // 动画：内容上浮淡入，1.2秒，动画函数，保持最终状态
+  animation: slideUpFadeIn 1.2s cubic-bezier(0.2, 0.6, 0.2, 1) forwards;
+}
+
+// 定义淡入动画
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+// 定义上浮淡入动画
+@keyframes slideUpFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(25vh);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ****************** 卡片内通用样式 ******************
+.cardRoot {
+  background-color: var(--backColor);
+}
+
+.cardHeader {
+  border-color: color-mix(in srgb, var(--backColor) 80%, #eee);
+}
+
+.cardTitle,
+.cardBody {
+  color: var(--textColor) !important;
+}
+
+.homeCardBody {
+  height: calc(100% - 56px);
+}
+
+.cardGary {
+  color: color-mix(in srgb, var(--textColor) 40%, #eee);
+}
+
+// ****************** 对话框通用样式 ******************
+.modalContainer {
+  background-color: var(--backColor) !important;
+}
+
+.modalTitle,
+.modalBody {
+  color: var(--textColor) !important;
+}
+
+// ****************** 表单通用样式 ******************
+.formLabel {
+  color: var(--textColor) !important;
+}
+
+.input {
+  background-color: color-mix(in srgb, var(--backColor) 60%, #eee) !important;
+  color: var(--textColor) !important;
+}
+
+// ****************** 表格通用样式 ******************
+.tableRoot {
+  background-color: var(--backColor) !important;
+}
+
+.tableHeader {
+  background-color: color-mix(in srgb, var(--backColor) 80%, #eee) !important;
+  color: var(--textColor) !important;
+}
+
+.tableBody {
+  background-color: var(--backColor) !important;
+  color: var(--textColor) !important;
+}
+
+.pagination {
+  color: var(--textColor) !important;
+}
+
+.paginationItem {
+  background-color: color-mix(in srgb, var(--backColor) 80%, #eee) !important;
+  color: var(--textColor) !important;
+}
+
+// ****************** 描述列表通用样式 ******************
+.descRoot {
+  background-color: var(--backColor) !important;
+}
+
+.descLabel {
+  background-color: color-mix(in srgb, var(--backColor) 80%, #eee) !important;
+  color: var(--textColor) !important;
+}
+
+.descContent {
+  background-color: var(--backColor) !important;
+  color: var(--textColor) !important;
+}
+
+.dividerRoot {
+  color: var(--textColor) !important;
+}
+
+.divider {
+  border-color: color-mix(in srgb, var(--backColor) 60%, #ccc) !important;
+  color: var(--textColor) !important;
+}
+
+.descLabelInline {
+  color: color-mix(in srgb, var(--textColor) 60%, #eee) !important;
+}
+// ****************** 选择器通用样式 ******************
+.selectRoot {
+  background-color: color-mix(in srgb, var(--backColor) 60%, #eee) !important;
+  color: var(--textColor) !important;
+}
+
+.selectPopup {
+  background-color: color-mix(in srgb, var(--backColor) 90%, #eee) !important;
+  color: var(--textColor) !important;
+}
+
+.selectListItem {
+  color: color-mix(in srgb, var(--textColor) 40%, #ccc) !important;
+}
+
+// ****************** 确认框通用样式 ******************
+.popconfirmRoot {
+  background-color: color-mix(in srgb, var(--backColor) 90%, #eee) !important;
+}
+
+.popconfirmTitle,
+.popconfirmContent {
+  color: var(--textColor) !important;
+}

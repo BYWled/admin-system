@@ -2,6 +2,7 @@
   "name": "admin-system",
   "private": true,
   "version": "0.0.0",
+  "license": "Apache-2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,8 +11,19 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ant-design/icons": "~6.1.0",
+    "@uiw/react-md-editor": "^4.0.11",
+    "antd": "^6.1.4",
+    "antd-img-crop": "^4.29.0",
+    "axios": "^1.13.2",
+    "dayjs": "^1.11.19",
+    "echarts": "^6.0.0",
+    "html2canvas": "^1.4.1",
+    "js-md5": "^0.8.3",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-countup": "^6.5.3",
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^7.12.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
@@ -21,7 +33,9 @@
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
+    "gh-pages": "^6.3.0",
     "globals": "^16.5.0",
+    "sass": "^1.97.2",
     "vite": "^7.2.4"
   }
 }
