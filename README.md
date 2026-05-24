@@ -26,6 +26,11 @@
 	<a href="https://mirror-admin.wled.top">在线预览</a>
 </p>
 
+> **在线演示登录凭证**
+>
+> - **账号**：`admin`
+> - **密码**：`admin123456`
+
 ## 项目概览
 
 这个项目更适合作为前端管理后台练习模板或课程示例，而**不是直接用于生产环境**。当前代码已经具备完整的页面骨架与基础业务流程，主要特点如下：
@@ -44,7 +49,7 @@
 | GitHub   | https://github.com/BYWled/admin-system  | 主仓库，推荐用于 Issue、PR 与版本追踪 |
 | Gitee    | https://gitee.com/BYWled/admin-system   | 中国国内镜像仓库，适合国内访问        |
 | GitCode  | https://gitcode.com/BYWled/admin-system | 中国镜像仓库，便于多平台分发          |
-| 在线预览 | https://mirror-admin.wled.top           | 主分支展示用预览地址                  |
+| 在线预览 | https://mirror-admin.wled.top           | 主分支展示用预览地址<br>🔑 演示账号：`admin` / 密码：`admin123456` |
 
 ## 当前功能
 
@@ -164,31 +169,32 @@ pnpm lint
 项目使用统一的 Axios 实例并对API进行三层封装，请在 src/utils/service.js 中维护接口基地址：
 
 ```js
-export const baseURL = 'https://******';
+export const baseURL = "https://******";
 ```
 
 ## 部署说明
 
 仓库内提供了 GitHub Actions 自动部署工作流，可用于发布到 GitHub Pages
-  - 如果需要部署到 Github ，需要调整 `.github/workflows/deploy.yml` 中的相关配置：
-    - 构建前替换生产环境 baseUrl：
-      ```yaml
-      - name: 构建前替换生产环境 baseUrl
-        run: |
-          sed -i "s|export const baseURL = '/api'|export const baseURL = '***你的后端地址***'|g" src/utils/service.js
-      ```
-    - 部署到 gh-pages 分支
-        ```yaml
-        - name: 部署到 gh-pages 分支 🚀
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }} # 确保你提前给工作流授权
-          publish_dir: ./dist
-          publish_branch: gh-pages # 部署生成的分支
-          commit_message: ${{ github.event.head_commit.message }}
-          cname: ***你的域名或删除本行***
-        ```
-  - 如果你计划连接不同环境的后端，建议通过环境变量进一步拆分开发与生产配置
+
+- 如果需要部署到 Github ，需要调整 `.github/workflows/deploy.yml` 中的相关配置：
+  - 构建前替换生产环境 baseUrl：
+    ```yaml
+    - name: 构建前替换生产环境 baseUrl
+      run: |
+        sed -i "s|export const baseURL = '/api'|export const baseURL = '***你的后端地址***'|g" src/utils/service.js
+    ```
+  - 部署到 gh-pages 分支
+    ```yaml
+    - name: 部署到 gh-pages 分支 🚀
+    uses: peaceiris/actions-gh-pages@v3
+    with:
+      github_token: ${{ secrets.GITHUB_TOKEN }} # 确保你提前给工作流授权
+      publish_dir: ./dist
+      publish_branch: gh-pages # 部署生成的分支
+      commit_message: ${{ github.event.head_commit.message }}
+      cname: ***你的域名或删除本行***
+    ```
+- 如果你计划连接不同环境的后端，建议通过环境变量进一步拆分开发与生产配置
 
 ## 兼容性说明
 
